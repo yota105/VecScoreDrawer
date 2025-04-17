@@ -137,7 +137,7 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Strin
     let pitch = core.parse::<Pitch>()
         .map_err(|e| format!("Invalid pitch `{}`: {}", core, e))?;
     // pitch_cents = MIDI note number * 100
-    let pitch_cents = match pitch.midi_number() {
+    let pitch_cents = match pitch.to_midi_number() {
         Ok(n) => Some((n as u16) * 100),
         Err(_) => None,
     };
