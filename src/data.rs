@@ -158,6 +158,11 @@ impl Pitch {
         }
     }
 
+    #[inline]
+    pub fn to_midi_number(&self) -> Result<u8, String> {
+        self.midi_number()
+    }
+
     /// Convert to “cents” representation (MIDI × 100).
     pub fn cents(&self) -> Result<u16, String> {
         self.midi_number().map(|n| (n as u16) * 100)
