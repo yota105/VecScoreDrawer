@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(clippy::empty_line_after_doc_comments)]
+
 use std::str::FromStr;
 
 /// Score represents the entire musical score and holds multiple measures.
