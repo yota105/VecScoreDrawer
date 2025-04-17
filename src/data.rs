@@ -21,24 +21,20 @@ pub struct Beat {
 /// ScoreElement recursively represents the elements within a beat.
 #[derive(Debug, Clone)]
 pub enum ScoreElement {
-    /// When it is a single note or rest (Event)
-    Event(Event),
-    /// When a unit is subdivided further (e.g., tuplets)
+    Event(Event),          // simple note / rest
     Subdivision(Subdivision),
-    /// In the case of a chord. Multiple events (notes) sound simultaneously.
     Chord(Chord),
+    Tie,                   // tie‑continuation marker
 }
 
 /// Event represents a single note or rest.
 #[derive(Debug, Clone)]
 pub struct Event {
-    /// Indicates whether it is a note or a rest.
     pub event_type: EventType,
-    /// For notes, Some(Pitch) is provided; for rests, it is None.
     pub pitch: Option<Pitch>,
-    /// Flag indicating whether it is tied to the following note.
+    /// MIDI note number × 100 ( = cents )。rest のときは None
+    pub pitch_cents: Option<u16>,
     pub tie: bool,
-    /// Relative duration with respect to the basic unit of the beat (typically 1.0 is standard).
     pub duration: f32,
 }
 
@@ -52,26 +48,20 @@ pub enum EventType {
 /// Subdivision is used when subdividing a basic unit further (e.g., tuplets).
 #[derive(Debug, Clone)]
 pub struct Subdivision {
-    /// A collection of subdivided elements (recursively storing ScoreElements).
     pub elements: Vec<ScoreElement>,
-    /// The subdivision factor (for example, 3 means a triplet).
     pub base_division: u32,
 }
 
 /// Chord represents a chord with multiple simultaneous sounding events.
 #[derive(Debug, Clone)]
 pub struct Chord {
-    /// Each note (Event) that makes up the chord (typically all sounding at the same time).
     pub events: Vec<Event>,
 }
 
-/// Pitch represents a musical pitch that can be specified either by a MIDI note number or by note name.
+/// Pitch can be specified either by MIDI note number or by note name.
 #[derive(Debug, Clone)]
 pub enum Pitch {
-    /// Specified as a MIDI note number (e.g., 60 corresponds to "C4").
     Midi(u8),
-    /// Specified by note name. It holds the note letter, an optional accidental (Sharp/Flat),
-    /// and an octave number.
     NoteName {
         letter: NoteLetter,
         accidental: Option<Accidental>,
@@ -79,31 +69,33 @@ pub enum Pitch {
     },
 }
 
-/// NoteLetter represents the basic letters (A through G) of a note name.
+/// Note letters and accidentals -------------------------------------------------------------
+
 #[derive(Debug, Clone)]
 pub enum NoteLetter {
     A, B, C, D, E, F, G,
 }
 
-/// Accidental indicates a sharp or flat.
 #[derive(Debug, Clone)]
 pub enum Accidental {
     Sharp,
     Flat,
 }
 
-/// Implements FromStr so that Pitch can be parsed from text (e.g., "60" or "C#4").
+/// --- FromStr ------------------------------------------------------------------------------
+
 impl FromStr for Pitch {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // First, try to parse as a u8 for a MIDI note number.
+        // MIDI number?
         if let Ok(num) = s.parse::<u8>() {
             return Ok(Pitch::Midi(num));
         }
+
         let mut chars = s.chars();
-        // The first character is interpreted as the note letter (A-G).
-        let letter = chars.next().ok_or("Empty input".to_string())?;
-        let note_letter = match letter.to_ascii_uppercase() {
+        let letter_char = chars.next().ok_or("Empty input")?;
+        let letter = match letter_char.to_ascii_uppercase() {
             'A' => NoteLetter::A,
             'B' => NoteLetter::B,
             'C' => NoteLetter::C,
@@ -111,25 +103,63 @@ impl FromStr for Pitch {
             'E' => NoteLetter::E,
             'F' => NoteLetter::F,
             'G' => NoteLetter::G,
-            _ => return Err(format!("Invalid note letter: {}", letter)),
+            _   => return Err(format!("Invalid note letter: {}", letter_char)),
         };
 
-        // Determine if the next character is an accidental ('#' or 'b') or the start of the octave number.
+        // accidental?
         let mut accidental = None;
-        let remaining: String;
+        let rest: String;
         if let Some(ch) = chars.next() {
             if ch == '#' || ch == 'b' {
                 accidental = Some(if ch == '#' { Accidental::Sharp } else { Accidental::Flat });
-                remaining = chars.collect();
+                rest = chars.collect();
             } else {
-                // If not an accidental, treat it as the beginning of the octave number.
-                remaining = std::iter::once(ch).chain(chars).collect();
+                rest = std::iter::once(ch).chain(chars).collect();
             }
         } else {
-            return Err("Missing octave information".to_string());
+            return Err("Missing octave information".into());
         }
-        // Parse the remainder as the octave number.
-        let octave: i32 = remaining.parse().map_err(|_| "Invalid octave number".to_string())?;
-        Ok(Pitch::NoteName { letter: note_letter, accidental, octave })
+
+        let octave: i32 = rest.parse().map_err(|_| "Invalid octave".to_string())?;
+        Ok(Pitch::NoteName { letter, accidental, octave })
+    }
+}
+
+/// --- Pitch utility methods (ownership‑safe) -----------------------------------------------
+
+impl Pitch {
+    /// Convert to MIDI note number (0–127).
+    pub fn midi_number(&self) -> Result<u8, String> {
+        match self {
+            Pitch::Midi(n) => Ok(*n),
+            Pitch::NoteName { letter, accidental, octave } => {
+                // semitone offset of the natural letter
+                let base = match letter {
+                    NoteLetter::C => 0,
+                    NoteLetter::D => 2,
+                    NoteLetter::E => 4,
+                    NoteLetter::F => 5,
+                    NoteLetter::G => 7,
+                    NoteLetter::A => 9,
+                    NoteLetter::B => 11,
+                };
+                let shift = match accidental {
+                    Some(Accidental::Sharp) => 1,
+                    Some(Accidental::Flat)  => -1,
+                    None                    => 0,
+                };
+                let midi = (octave + 1) * 12 + base + shift;
+                if (0..=127).contains(&midi) {
+                    Ok(midi as u8)
+                } else {
+                    Err(format!("Pitch {:?} out of MIDI range", self))
+                }
+            }
+        }
+    }
+
+    /// Convert to “cents” representation (MIDI × 100).
+    pub fn cents(&self) -> Result<u16, String> {
+        self.midi_number().map(|n| (n as u16) * 100)
     }
 }

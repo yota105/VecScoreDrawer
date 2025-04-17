@@ -1,125 +1,180 @@
-// src/parser.rs
 use crate::data::{
     Score, Measure, Beat, ScoreElement, Event, EventType, Subdivision, Chord, Pitch,
 };
 
-/// Parse an entire score from a text in our simple notation.
-/// Each non-empty line is treated as one measure containing one beat.
-pub fn parse_score(input: &str) -> Result<Score, String> {
-    let mut measures = Vec::new();
-    for line in input.lines() {
-        let line = line.trim();
-        if line.is_empty() {
-            continue;
+/// 1文字ずつ走査し、区切り文字 `[]{} ,` を独立したトークンとして抽出します。
+/// 空白はすべてスキップし、その他の文字は一続きのバッファとしてまとめます。
+fn tokenize(s: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut buf = String::new();
+    for ch in s.chars() {
+        match ch {
+            '[' | ']' | '{' | '}' | ',' => {
+                if !buf.is_empty() {
+                    tokens.push(buf.clone());
+                    buf.clear();
+                }
+                tokens.push(ch.to_string());
+            }
+            c if c.is_whitespace() => {
+                // 空白は無視
+                // buf をわざわざ flush しない
+            }
+            _ => buf.push(ch),
         }
-        // strip leading "N:" if present
-        let content = if let Some((_, rest)) = line.split_once(':') {
-            rest.trim()
-        } else {
-            line
-        };
-        // find the outermost [ ... ]
-        let start = content.find('[').ok_or("Missing '[' in line")?;
-        let end = content.rfind(']').ok_or("Missing ']' in line")?;
-        let inner = &content[start + 1..end];
-        let elements = parse_elements(inner)?;
-        let beat = Beat { elements };
-        measures.push(Measure { beats: vec![beat] });
     }
-    Ok(Score { measures })
+    if !buf.is_empty() {
+        tokens.push(buf);
+    }
+    tokens
 }
 
-/// Split a string like "72-, t, [71, 74], r" into top‑level tokens,
-/// then parse each into a ScoreElement.
-fn parse_elements(s: &str) -> Result<Vec<ScoreElement>, String> {
+/// トークン列を再帰的にパースして ScoreElement のベクタを返します。
+/// `outer_prev` はこのレベルの前にあった要素（tie の解決に利用）。
+fn parse_tokens(
+    tokens: &[String],
+    outer_prev: &[ScoreElement],
+) -> Result<Vec<ScoreElement>, String> {
     let mut elems = Vec::new();
-    let mut buf = String::new();
-    let mut depth = 0;
-    for c in s.chars() {
-        match c {
-            '[' | '{' => {
-                depth += 1;
-                buf.push(c);
+    let mut idx = 0;
+    while idx < tokens.len() {
+        match tokens[idx].as_str() {
+            "," => {
+                // 区切り文字はスキップ
+                idx += 1;
             }
-            ']' | '}' => {
-                depth -= 1;
-                buf.push(c);
-            }
-            ',' if depth == 0 => {
-                let token = buf.trim();
-                if !token.is_empty() {
-                    elems.push(parse_token(token, &elems)?);
+            "[" => {
+                // 対応する ']' を探す
+                let mut depth = 1;
+                let start = idx + 1;
+                let mut end = start;
+                while end < tokens.len() && depth > 0 {
+                    match tokens[end].as_str() {
+                        "[" => depth += 1,
+                        "]" => depth -= 1,
+                        _ => {}
+                    }
+                    end += 1;
                 }
-                buf.clear();
+                if depth != 0 {
+                    return Err("Unmatched '['".into());
+                }
+                // start .. end-1 が inner
+                let inner = &tokens[start..end - 1];
+                let mut combined = outer_prev.to_vec();
+                combined.extend(elems.clone());
+                let sub_elems = parse_tokens(inner, &combined)?;
+                let base_division = sub_elems.len() as u32;
+                elems.push(ScoreElement::Subdivision(Subdivision {
+                    elements: sub_elems,
+                    base_division,
+                }));
+                idx = end; // ']' の次へ
             }
-            _ => buf.push(c),
+            "{" => {
+                // 対応する '}' を探す
+                let mut depth = 1;
+                let start = idx + 1;
+                let mut end = start;
+                while end < tokens.len() && depth > 0 {
+                    match tokens[end].as_str() {
+                        "{" => depth += 1,
+                        "}" => depth -= 1,
+                        _ => {}
+                    }
+                    end += 1;
+                }
+                if depth != 0 {
+                    return Err("Unmatched '{'".into());
+                }
+                let inner = &tokens[start..end - 1];
+                let mut combined = outer_prev.to_vec();
+                combined.extend(elems.clone());
+                let chord_elems = parse_tokens(inner, &combined)?;
+                let mut events = Vec::new();
+                for se in chord_elems {
+                    if let ScoreElement::Event(ev) = se {
+                        events.push(ev);
+                    } else {
+                        return Err("Chord may contain only simple events".into());
+                    }
+                }
+                elems.push(ScoreElement::Chord(Chord { events }));
+                idx = end;
+            }
+            tok => {
+                // "r", "t", "72-", "C#4" など
+                let mut combined = outer_prev.to_vec();
+                combined.extend(elems.clone());
+                let se = parse_token(tok, &combined)?;
+                elems.push(se);
+                idx += 1;
+            }
         }
-    }
-    if !buf.trim().is_empty() {
-        elems.push(parse_token(buf.trim(), &elems)?);
     }
     Ok(elems)
 }
 
-/// Parse a single token, using previous elements for tie ("t") handling.
+/// 単一トークンの解釈。tie("t"), rest("r"), note などを処理。
 fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, String> {
     // Rest
     if token == "r" {
         return Ok(ScoreElement::Event(Event {
             event_type: EventType::Rest,
             pitch: None,
+            pitch_cents: None,
             tie: false,
             duration: 1.0,
         }));
     }
-    // Tie continuation: duplicate last pitch with tie = true
+    // Tie continuation
     if token == "t" {
-        if let Some(ScoreElement::Event(last)) = prev.last() {
-            if let Some(p) = &last.pitch {
-                return Ok(ScoreElement::Event(Event {
-                    event_type: EventType::Note,
-                    pitch: Some(p.clone()),
-                    tie: true,
-                    duration: 1.0,
-                }));
-            }
-        }
-        return Err("Invalid tie: no preceding note to tie".into());
+        return Ok(ScoreElement::Tie);
     }
-    // Subdivision: nested [ ... ]
-    if token.starts_with('[') && token.ends_with(']') {
-        let inner = &token[1..token.len() - 1];
-        let sub = parse_elements(inner)?;
-        // compute division count before moving `sub`
-        let base_division = sub.len() as u32;
-        return Ok(ScoreElement::Subdivision(Subdivision {
-            elements: sub,
-            base_division,
-        }));
-    }
-    // Chord: nested { ... }
-    if token.starts_with('{') && token.ends_with('}') {
-        let inner = &token[1..token.len() - 1];
-        let sub = parse_elements(inner)?;
-        let mut events = Vec::new();
-        for se in sub {
-            if let ScoreElement::Event(ev) = se {
-                events.push(ev);
-            } else {
-                return Err("Chord may contain only simple events".into());
-            }
-        }
-        return Ok(ScoreElement::Chord(Chord { events }));
-    }
-    // Note (no tie in this simplified parser)
-    let core = token.trim_end_matches('-');
+    // Note (with optional trailing '-')
     let tie_flag = token.ends_with('-');
+    let core = token.trim_end_matches('-');
     let pitch = core.parse::<Pitch>()
         .map_err(|e| format!("Invalid pitch `{}`: {}", core, e))?;
+    // pitch_cents = MIDI note number * 100
+    let pitch_cents = match pitch.midi_number() {
+        Ok(n) => Some((n as u16) * 100),
+        Err(_) => None,
+    };
     Ok(ScoreElement::Event(Event {
         event_type: EventType::Note,
         pitch: Some(pitch),
+        pitch_cents,
         tie: tie_flag,
         duration: 1.0,
     }))
+}
+
+/// テキスト入力をトークナイズ→パースして Score に変換します。
+pub fn parse_score(input: &str) -> Result<Score, String> {
+    let mut measures = Vec::new();
+    for (line_idx, line) in input.lines().enumerate() {
+        let line_no = line_idx + 1;
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        let content = if let Some((_, rest)) = line.split_once(':') {
+            rest.trim()
+        } else {
+            line
+        };
+        let start = content.find('[')
+            .ok_or_else(|| format!("Line {}: missing '['", line_no))?;
+        let end = content.rfind(']')
+            .ok_or_else(|| format!("Line {}: missing ']'", line_no))?;
+        let inner = &content[start + 1..end];
+        let tokens = tokenize(inner);
+        let beat = Beat {
+            elements: parse_tokens(&tokens, &[])
+                .map_err(|e| format!("Line {}: {}", line_no, e))?,
+        };
+        measures.push(Measure { beats: vec![beat] });
+    }
+    Ok(Score { measures })
 }
