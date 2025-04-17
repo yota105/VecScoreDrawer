@@ -21,47 +21,57 @@ pub struct Beat {
 /// ScoreElement recursively represents the elements within a beat.
 #[derive(Debug, Clone)]
 pub enum ScoreElement {
-    /// Single note or rest.
+    /// When it is a single note or rest (Event)
     Event(Event),
-    /// Subdivision of a basic unit (e.g. tuplets).
+    /// When a unit is subdivided further (e.g., tuplets)
     Subdivision(Subdivision),
-    /// Chord: multiple notes sounding simultaneously.
+    /// In the case of a chord. Multiple events (notes) sound simultaneously.
     Chord(Chord),
 }
 
-/// Event represents a single note or a rest.
+/// Event represents a single note or rest.
 #[derive(Debug, Clone)]
 pub struct Event {
-    pub event_type: EventType,  // Note or Rest
-    pub pitch: Option<Pitch>,   // Some(Pitch) for notes, None for rests
-    pub tie: bool,              // tied to the next event?
-    pub duration: f32,          // relative to one basic unit (e.g. 1.0)
+    /// Indicates whether it is a note or a rest.
+    pub event_type: EventType,
+    /// For notes, Some(Pitch) is provided; for rests, it is None.
+    pub pitch: Option<Pitch>,
+    /// Flag indicating whether it is tied to the following note.
+    pub tie: bool,
+    /// Relative duration with respect to the basic unit of the beat (typically 1.0 is standard).
+    pub duration: f32,
 }
 
-/// Distinguishes notes from rests.
+/// EventType distinguishes between notes and rests.
 #[derive(Debug, Clone)]
 pub enum EventType {
     Note,
     Rest,
 }
 
-/// Subdivision is used when subdividing a basic unit further (e.g. triplets).
+/// Subdivision is used when subdividing a basic unit further (e.g., tuplets).
 #[derive(Debug, Clone)]
 pub struct Subdivision {
-    pub elements: Vec<ScoreElement>, // recursive
-    pub base_division: u32,          // e.g. 3 for triplets
+    /// A collection of subdivided elements (recursively storing ScoreElements).
+    pub elements: Vec<ScoreElement>,
+    /// The subdivision factor (for example, 3 means a triplet).
+    pub base_division: u32,
 }
 
-/// Chord represents a chord of simultaneous notes.
+/// Chord represents a chord with multiple simultaneous sounding events.
 #[derive(Debug, Clone)]
 pub struct Chord {
+    /// Each note (Event) that makes up the chord (typically all sounding at the same time).
     pub events: Vec<Event>,
 }
 
-/// Pitch can be specified by MIDI note number or by a note name (e.g. "C#4").
+/// Pitch represents a musical pitch that can be specified either by a MIDI note number or by note name.
 #[derive(Debug, Clone)]
 pub enum Pitch {
-    Midi(u8), // e.g. 60 = C4
+    /// Specified as a MIDI note number (e.g., 60 corresponds to "C4").
+    Midi(u8),
+    /// Specified by note name. It holds the note letter, an optional accidental (Sharp/Flat),
+    /// and an octave number.
     NoteName {
         letter: NoteLetter,
         accidental: Option<Accidental>,
@@ -69,28 +79,42 @@ pub enum Pitch {
     },
 }
 
+/// NoteLetter represents the basic letters (A through G) of a note name.
 #[derive(Debug, Clone)]
-pub enum NoteLetter { A, B, C, D, E, F, G }
-#[derive(Debug, Clone)]
-pub enum Accidental { Sharp, Flat }
+pub enum NoteLetter {
+    A, B, C, D, E, F, G,
+}
 
-/// Parse a string like "60" or "C#4" into a Pitch.
+/// Accidental indicates a sharp or flat.
+#[derive(Debug, Clone)]
+pub enum Accidental {
+    Sharp,
+    Flat,
+}
+
+/// Implements FromStr so that Pitch can be parsed from text (e.g., "60" or "C#4").
 impl FromStr for Pitch {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // Try MIDI number first
+        // First, try to parse as a u8 for a MIDI note number.
         if let Ok(num) = s.parse::<u8>() {
             return Ok(Pitch::Midi(num));
         }
         let mut chars = s.chars();
+        // The first character is interpreted as the note letter (A-G).
         let letter = chars.next().ok_or("Empty input".to_string())?;
         let note_letter = match letter.to_ascii_uppercase() {
-            'A' => NoteLetter::A, 'B' => NoteLetter::B, 'C' => NoteLetter::C,
-            'D' => NoteLetter::D, 'E' => NoteLetter::E, 'F' => NoteLetter::F,
+            'A' => NoteLetter::A,
+            'B' => NoteLetter::B,
+            'C' => NoteLetter::C,
+            'D' => NoteLetter::D,
+            'E' => NoteLetter::E,
+            'F' => NoteLetter::F,
             'G' => NoteLetter::G,
-            _   => return Err(format!("Invalid note letter: {}", letter)),
+            _ => return Err(format!("Invalid note letter: {}", letter)),
         };
-        // Optional accidental
+
+        // Determine if the next character is an accidental ('#' or 'b') or the start of the octave number.
         let mut accidental = None;
         let remaining: String;
         if let Some(ch) = chars.next() {
@@ -98,11 +122,13 @@ impl FromStr for Pitch {
                 accidental = Some(if ch == '#' { Accidental::Sharp } else { Accidental::Flat });
                 remaining = chars.collect();
             } else {
+                // If not an accidental, treat it as the beginning of the octave number.
                 remaining = std::iter::once(ch).chain(chars).collect();
             }
         } else {
             return Err("Missing octave information".to_string());
         }
+        // Parse the remainder as the octave number.
         let octave: i32 = remaining.parse().map_err(|_| "Invalid octave number".to_string())?;
         Ok(Pitch::NoteName { letter: note_letter, accidental, octave })
     }
