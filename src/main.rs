@@ -2,6 +2,7 @@ mod data;
 mod parser;
 
 use parser::parse_score;
+use std::fs::write;
 
 fn main() {
     let input = r#"
@@ -12,8 +13,18 @@ fn main() {
 5: [{72, 76, 79}, r]
 "#;
 
+    let output_file = "output.txt";
+
     match parse_score(input) {
-        Ok(score) => println!("Parsed Score:\n{:#?}", score),
+        Ok(score) => {
+            let formatted = format!("Parsed Score:\n{:#?}", score);
+            println!("{}", formatted);
+            if let Err(e) = write(output_file, &formatted) {
+                eprintln!("File write error: {}", e);
+            } else {
+                println!("Score successfully written to {}", output_file);
+            }
+        },
         Err(err) => eprintln!("Parse error: {}", err),
     }
 }
