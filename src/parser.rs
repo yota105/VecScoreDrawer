@@ -160,7 +160,7 @@ fn remove_comments_multiline(input: &str) -> String {
             if let Some(&next) = chars.peek() {
                 if next == '/' {
                     // Line comment: skip until newline, but keep the newline
-                    while let Some(nc) = chars.next() {
+                    for nc in chars.by_ref() { // Changed from while let
                         if nc == '\n' {
                             result.push('\n');
                             break;
@@ -191,16 +191,14 @@ fn remove_comments_multiline(input: &str) -> String {
                 // else: Just a '*' within the comment, ignore it
             }
             // else: End of input after '*', ignore it
-        } else {
-            if !in_block {
-                // Not in a block comment, keep the character
-                result.push(c);
-            } else if c == '\n' {
-                // Inside a block comment, but keep newline for line counting
-                result.push('\n');
-            }
-            // else: Inside block comment, ignore the character (unless newline)
+        } else if !in_block { // Changed from else { if ... }
+            // Not in a block comment, keep the character
+            result.push(c);
+        } else if c == '\n' { // Changed from else if inside else block
+            // Inside a block comment, but keep newline for line counting
+            result.push('\n');
         }
+        // else: Inside block comment, ignore the character (unless newline) - This case is implicitly handled now
     }
     result
 }
