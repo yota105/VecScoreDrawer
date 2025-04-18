@@ -18,7 +18,6 @@ fn tokenize(s: &str) -> Vec<String> {
             }
             c if c.is_whitespace() => {
                 // 空白は無視
-                // buf をわざわざ flush しない
             }
             _ => buf.push(ch),
         }
@@ -40,11 +39,9 @@ fn parse_tokens(
     while idx < tokens.len() {
         match tokens[idx].as_str() {
             "," => {
-                // 区切り文字はスキップ
                 idx += 1;
             }
             "[" => {
-                // 対応する ']' を探す
                 let mut depth = 1;
                 let start = idx + 1;
                 let mut end = start;
@@ -59,7 +56,6 @@ fn parse_tokens(
                 if depth != 0 {
                     return Err("Unmatched '['".into());
                 }
-                // start .. end-1 が inner
                 let inner = &tokens[start..end - 1];
                 let mut combined = outer_prev.to_vec();
                 combined.extend(elems.clone());
@@ -69,10 +65,11 @@ fn parse_tokens(
                     elements: sub_elems,
                     base_division,
                 }));
-                idx = end; // ']' の次へ
+// 対応する '}' を探す
+                idx = end;
             }
             "{" => {
-                // 対応する '}' を探す
+// 対応する '}' を探す
                 let mut depth = 1;
                 let start = idx + 1;
                 let mut end = start;
@@ -103,7 +100,7 @@ fn parse_tokens(
                 idx = end;
             }
             tok => {
-                // "r", "t", "72-", "C#4" など
+// "r", "t", "72-", "C#4" など
                 let mut combined = outer_prev.to_vec();
                 combined.extend(elems.clone());
                 let se = parse_token(tok, &combined)?;
@@ -117,7 +114,7 @@ fn parse_tokens(
 
 /// 単一トークンの解釈。tie("t"), rest("r"), note などを処理。
 fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, String> {
-    // Rest
+// Rest
     if token == "r" {
         return Ok(ScoreElement::Event(Event {
             event_type: EventType::Rest,
@@ -127,16 +124,16 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Strin
             duration: 1.0,
         }));
     }
-    // Tie continuation
+// Tie continuation
     if token == "t" {
         return Ok(ScoreElement::Tie);
     }
-    // Note (with optional trailing '-')
+// Note (with optional trailing '-')
     let tie_flag = token.ends_with('-');
     let core = token.trim_end_matches('-');
     let pitch = core.parse::<Pitch>()
         .map_err(|e| format!("Invalid pitch `{}`: {}", core, e))?;
-    // pitch_cents = MIDI note number * 100
+// pitch_cents = MIDI note number * 100
     let pitch_cents = match pitch.to_midi_number() {
         Ok(n) => Some((n as u16) * 100),
         Err(_) => None,
@@ -153,28 +150,97 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Strin
 /// テキスト入力をトークナイズ→パースして Score に変換します。
 pub fn parse_score(input: &str) -> Result<Score, String> {
     let mut measures = Vec::new();
+    let mut current_meter: Option<(usize, usize)> = None;
+
     for (line_idx, line) in input.lines().enumerate() {
         let line_no = line_idx + 1;
         let line = line.trim();
         if line.is_empty() {
             continue;
         }
-        let content = if let Some((_, rest)) = line.split_once(':') {
-            rest.trim()
+
+        // 小節番号（例: "1:"）を除去
+        let line = if let Some(idx) = line.find(':') {
+            line[idx + 1..].trim()
         } else {
             line
         };
+
+        // 拍子指定の有無を判定
+        let (meter, content) = if let Some((meter_part, rest)) = line.split_once(' ') {
+            if let Some((num, denom)) = parse_meter(meter_part) {
+                (Some((num, denom)), rest.trim())
+            } else {
+                (None, line)
+            }
+        } else {
+            (None, line)
+        };
+
+        // 最初の小節に拍子指定がなければエラー
+        if current_meter.is_none() && meter.is_none() {
+            return Err(format!("Line {}: 最初の小節に拍子指定がありません", line_no));
+        }
+        // 拍子変更があれば更新
+        if let Some(m) = meter {
+            current_meter = Some(m);
+        }
+        let meter = current_meter.expect("meter must be set");
+
         let start = content.find('[')
             .ok_or_else(|| format!("Line {}: missing '['", line_no))?;
         let end = content.rfind(']')
             .ok_or_else(|| format!("Line {}: missing ']'", line_no))?;
         let inner = &content[start + 1..end];
         let tokens = tokenize(inner);
-        let beat = Beat {
-            elements: parse_tokens(&tokens, &[])
-                .map_err(|e| format!("Line {}: {}", line_no, e))?,
-        };
-        measures.push(Measure { beats: vec![beat] });
+
+        // 拍ごとに分割してパース
+        let mut beats = Vec::new();
+        let mut beat_tokens = Vec::new();
+        let mut depth = 0;
+        for token in tokens {
+            match token.as_str() {
+                "[" | "{" => {
+                    depth += 1;
+                    beat_tokens.push(token);
+                }
+                "]" | "}" => {
+                    depth -= 1;
+                    beat_tokens.push(token);
+                }
+                "," if depth == 0 => {
+                    // 最上位のカンマで拍区切り
+                    beats.push(Beat {
+                        elements: parse_tokens(&beat_tokens, &[]).map_err(|e| format!("Line {}: {}", line_no, e))?,
+                    });
+                    beat_tokens.clear();
+                }
+                _ => {
+                    beat_tokens.push(token);
+                }
+            }
+        }
+        // 最後のビート
+        if !beat_tokens.is_empty() {
+            beats.push(Beat {
+                elements: parse_tokens(&beat_tokens, &[]).map_err(|e| format!("Line {}: {}", line_no, e))?,
+            });
+        }
+
+        // 拍数チェック
+        if beats.len() != meter.0 {
+            return Err(format!("Line {}: 拍数が{}に合いません（{}個）", line_no, meter.0, beats.len()));
+        }
+
+        measures.push(Measure { beats, meter });
     }
     Ok(Score { measures })
+}
+
+/// "4/4" のような文字列を (4,4) に変換
+fn parse_meter(s: &str) -> Option<(usize, usize)> {
+    let mut parts = s.split('/');
+    let num = parts.next()?.parse().ok()?;
+    let denom = parts.next()?.parse().ok()?;
+    Some((num, denom))
 }
