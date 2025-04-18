@@ -159,14 +159,14 @@ pub fn parse_score(input: &str) -> Result<Score, String> {
             continue;
         }
 
-        // 小節番号（例: "1:"）を除去
+        // Remove measure number (e.g., "1:")
         let line = if let Some(idx) = line.find(':') {
             line[idx + 1..].trim()
         } else {
             line
         };
 
-        // 拍子指定の有無を判定
+        // Detect meter
         let (meter, content) = if let Some((meter_part, rest)) = line.split_once(' ') {
             if let Some((num, denom)) = parse_meter(meter_part) {
                 (Some((num, denom)), rest.trim())
@@ -177,11 +177,11 @@ pub fn parse_score(input: &str) -> Result<Score, String> {
             (None, line)
         };
 
-        // 最初の小節に拍子指定がなければエラー
+        // Error if no meter in the first measure
         if current_meter.is_none() && meter.is_none() {
-            return Err(format!("Line {}: 最初の小節に拍子指定がありません", line_no));
+            return Err(format!("Line {}: No meter specified in the first measure", line_no));
         }
-        // 拍子変更があれば更新
+        // Update meter if changed
         if let Some(m) = meter {
             current_meter = Some(m);
         }
@@ -194,7 +194,7 @@ pub fn parse_score(input: &str) -> Result<Score, String> {
         let inner = &content[start + 1..end];
         let tokens = tokenize(inner);
 
-        // 拍ごとに分割してパース
+        // Split and parse by beat
         let mut beats = Vec::new();
         let mut beat_tokens = Vec::new();
         let mut depth = 0;
@@ -209,7 +209,7 @@ pub fn parse_score(input: &str) -> Result<Score, String> {
                     beat_tokens.push(token);
                 }
                 "," if depth == 0 => {
-                    // 最上位のカンマで拍区切り
+                    // Top-level comma as beat separator
                     beats.push(Beat {
                         elements: parse_tokens(&beat_tokens, &[]).map_err(|e| format!("Line {}: {}", line_no, e))?,
                     });
@@ -220,16 +220,19 @@ pub fn parse_score(input: &str) -> Result<Score, String> {
                 }
             }
         }
-        // 最後のビート
+        // Last beat
         if !beat_tokens.is_empty() {
             beats.push(Beat {
                 elements: parse_tokens(&beat_tokens, &[]).map_err(|e| format!("Line {}: {}", line_no, e))?,
             });
         }
 
-        // 拍数チェック
+        // Beat count check
         if beats.len() != meter.0 {
-            return Err(format!("Line {}: 拍数が{}に合いません（{}個）", line_no, meter.0, beats.len()));
+            return Err(format!(
+                "Line {}: Number of beats does not match meter (expected {}, got {})",
+                line_no, meter.0, beats.len()
+            ));
         }
 
         measures.push(Measure { beats, meter });
