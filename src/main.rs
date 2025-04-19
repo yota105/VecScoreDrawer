@@ -2,24 +2,23 @@ mod data;
 mod parser;
 
 use parser::parse_score;
-use std::fs::write;
+use std::fs::{read_to_string, write}; // read_to_string を追加
+use std::path::Path; // Path を追加
 
 fn main() {
-    let input = r#"
-1: 4/4 [72-, t, 76, 79]
-2: [71-, [t, [72, 74]], 72, r]
-// test comment 
-3: [81-, t, 79, 84] /* test
-test
-test */
-4: [79, [77, [76, 77]], 76, r]
-5: 2/4 [{72, 76, 79}, {72, 77, 81}]
-6: 9/8 [{71-, 74-, 79}, t, t, {72, 76, 79}, t, t, r, r, r]
-"#;
-
+    let input_file = "sample.vsc"; // 入力ファイル名を指定
     let output_file = "output.txt";
 
-    match parse_score(input) {
+    // ファイルを読み込む
+    let input = match read_to_string(Path::new(input_file)) {
+        Ok(content) => content,
+        Err(e) => {
+            eprintln!("Error reading file {}: {}", input_file, e);
+            return; // エラーが発生したら終了
+        }
+    };
+
+    match parse_score(&input) { // &input を渡すように変更
         Ok(score) => {
             let formatted = format!("Parsed Score:\n{:#?}", score);
             println!("{}", formatted);
