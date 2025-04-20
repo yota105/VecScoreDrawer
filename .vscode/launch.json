@@ -8,7 +8,8 @@
             "runtimeExecutable": "${execPath}", // VS Code 本体を使用
             "args": [
                 // 開発中の拡張機能があるフォルダへのパスを指定
-                "--extensionDevelopmentPath=${workspaceFolder}/vsc_lsp"
+                "--extensionDevelopmentPath=${workspaceFolder}/vsc_lsp",
+                "--extensionDevelopmentPath=${workspaceFolder}"
             ],
             "outFiles": [
                 // TypeScript のコンパイル先を指定（必要に応じて）

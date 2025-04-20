@@ -1,0 +1,14 @@
+{
+  "scopeName": "source.vsc",
+  "patterns": [
+    {
+      "name": "comment.line.double-slash.vsc",
+      "match": "//.*$"
+    },
+    {
+      "name": "comment.block.vsc",
+      "begin": "/\\*",
+      "end": "\\*/"
+    }
+  ]
+}

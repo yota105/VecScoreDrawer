@@ -1,0 +1,46 @@
+{
+  "name": "vsc-language",
+  "displayName": "VSC Language Support",
+  "publisher": "NAKAMURA Yota",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:vsc"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "vsc",
+        "aliases": [
+          "VSC",
+          "vsc"
+        ],
+        "extensions": [
+          ".vsc"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "vsc",
+        "scopeName": "source.vsc",
+        "path": "./syntaxes/vsc.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "@types/vscode": "^1.99.1",
+    "typescript": "^4.9.5"
+  }
+}
