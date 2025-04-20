@@ -62,18 +62,34 @@ impl Backend {
                 // --- Debug Output ---
                 self.client.log_message(MessageType::ERROR, format!("Parse error: {}", err_msg)).await;
 
-                // TODO: エラーメッセージから正確な位置情報を抽出する
-                // 現状は仮で先頭行にエラーを表示
+                // デフォルトは先頭行
+                let mut line_idx = 0;
+                let mut char_end = text.lines().next().unwrap_or("").len() as u32;
+
+                // メッセージ中の "Line N" を探す
+                if let Some(pos) = err_msg.find("Line ") {
+                    let rest = &err_msg[pos + "Line ".len()..];
+                    if let Some(num_str) = rest.split_whitespace().next() {
+                        if let Ok(n) = num_str.parse::<usize>() {
+                            if n > 0 {
+                                line_idx = n - 1;
+                                if let Some(line_text) = text.lines().nth(line_idx) {
+                                    char_end = line_text.len() as u32;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 let range = Range {
-                    start: Position { line: 0, character: 0 },
-                    // Adjust end character based on the first line length or a fixed value
-                    end: Position { line: 0, character: 80 }, // Example fixed length
+                    start: Position { line: line_idx as u32, character: 0 },
+                    end:   Position { line: line_idx as u32, character: char_end },
                 };
                 diagnostics.push(Diagnostic {
                     range,
                     severity: Some(DiagnosticSeverity::ERROR),
-                    message: err_msg, // Use the actual error message from the parser
-                    source: Some("VecScoreParser".to_string()), // Add a source identifier
+                    message: err_msg,
+                    source: Some("VecScoreParser".to_string()),
                     ..Default::default()
                 });
             }
