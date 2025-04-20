@@ -10,9 +10,11 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
+  // 修正: 拡張機能のルートからの相対パスで target を指定
   const serverPath = context.asAbsolutePath(
-    path.join('..', 'target', 'debug', 'vsc_lsp.exe')
+    path.join('target', 'debug', 'vsc_lsp.exe')
   );
+
   const serverOptions: ServerOptions = {
     run:   { command: serverPath, transport: TransportKind.stdio },
     debug: { command: serverPath, transport: TransportKind.stdio }
@@ -31,10 +33,7 @@ export function activate(context: ExtensionContext) {
     clientOptions
   );
 
-  // client が Disposable を持つのでこちらを登録
   context.subscriptions.push(client);
-
-  // サーバー起動は別呼び出し
   client.start();
 }
 

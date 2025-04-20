@@ -17,7 +17,7 @@ impl LanguageServer for Backend {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 text_document_sync: Some(TextDocumentSyncCapability::Kind(
-                    TextDocumentSyncKind::INCREMENTAL,
+                    TextDocumentSyncKind::FULL, // ← FULL に変更して試す
                 )),
                 ..Default::default()
             },
@@ -44,23 +44,42 @@ impl LanguageServer for Backend {
 impl Backend {
     /// text を parse_score に投げてエラーがあれば Diagnostic を返し、クライアントへ送信
     async fn validate(&self, uri: &Url, text: &str) {
+        // --- Debug Output Start ---
+        self.client.log_message(MessageType::INFO, format!("Validating URI: {}", uri)).await;
+        // Be cautious logging the full text if it can be very large
+        // self.client.log_message(MessageType::INFO, format!("Text to validate:\n{}", text)).await;
+        // --- Debug Output End ---
+
         let mut diagnostics = Vec::new();
 
-        if let Err(err_msg) = parse_score(text) {
-            // とりあえず document 全体の先頭行にエラーとみなして表示
-            let range = Range {
-                start: Position { line: 0, character: 0 },
-                end: Position { line: 0, character: text.lines().next().unwrap_or("").len() as u32 },
-            };
-            diagnostics.push(Diagnostic {
-                range,
-                severity: Some(DiagnosticSeverity::ERROR),
-                message: err_msg,
-                ..Default::default()
-            });
+        match parse_score(text) {
+            Ok(_) => {
+                // --- Debug Output ---
+                self.client.log_message(MessageType::INFO, "Parse successful.").await;
+                // Ok の場合は Diagnostic をクリアする
+            }
+            Err(err_msg) => {
+                // --- Debug Output ---
+                self.client.log_message(MessageType::ERROR, format!("Parse error: {}", err_msg)).await;
+
+                // TODO: エラーメッセージから正確な位置情報を抽出する
+                // 現状は仮で先頭行にエラーを表示
+                let range = Range {
+                    start: Position { line: 0, character: 0 },
+                    // Adjust end character based on the first line length or a fixed value
+                    end: Position { line: 0, character: 80 }, // Example fixed length
+                };
+                diagnostics.push(Diagnostic {
+                    range,
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    message: err_msg, // Use the actual error message from the parser
+                    source: Some("VecScoreParser".to_string()), // Add a source identifier
+                    ..Default::default()
+                });
+            }
         }
 
-        // クライアントへ送信
+        // Publish diagnostics (even if empty to clear previous errors)
         self.client
             .publish_diagnostics(uri.clone(), diagnostics, None)
             .await;

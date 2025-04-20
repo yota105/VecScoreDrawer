@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch VecScore LSP", // デバッグ構成の名前（任意）
+            "type": "extensionHost",      // 拡張機能開発ホストを起動
+            "request": "launch",
+            "runtimeExecutable": "${execPath}", // VS Code 本体を使用
+            "args": [
+                // 開発中の拡張機能があるフォルダへのパスを指定
+                "--extensionDevelopmentPath=${workspaceFolder}/vsc_lsp"
+            ],
+            "outFiles": [
+                // TypeScript のコンパイル先を指定（必要に応じて）
+                "${workspaceFolder}/vsc_lsp/out/**/*.js"
+            ]
+        }
+    ]
+}

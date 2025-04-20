@@ -7,7 +7,8 @@ const vscode_1 = require("vscode");
 const node_1 = require("vscode-languageclient/node");
 let client;
 function activate(context) {
-    const serverPath = context.asAbsolutePath(path.join('..', 'target', 'debug', 'vsc_lsp.exe'));
+    // 修正: 拡張機能のルートからの相対パスで target を指定
+    const serverPath = context.asAbsolutePath(path.join('target', 'debug', 'vsc_lsp.exe'));
     const serverOptions = {
         run: { command: serverPath, transport: node_1.TransportKind.stdio },
         debug: { command: serverPath, transport: node_1.TransportKind.stdio }
@@ -19,9 +20,7 @@ function activate(context) {
         }
     };
     client = new node_1.LanguageClient('vecscoreLsp', 'VecScore LSP', serverOptions, clientOptions);
-    // client が Disposable を持つのでこちらを登録
     context.subscriptions.push(client);
-    // サーバー起動は別呼び出し
     client.start();
 }
 function deactivate() {
