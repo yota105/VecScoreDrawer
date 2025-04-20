@@ -2,6 +2,30 @@ use crate::data::{
     Score, Measure, Beat, ScoreElement, Event, EventType, Subdivision, Chord, Pitch,
 };
 
+/// Represents a parsing error with an optional line number.
+#[derive(Debug, Clone)]
+pub struct ParseError {
+    /// The error message.
+    pub message: String,
+    /// The 0-based line index where the error occurred, if available.
+    pub line: Option<usize>,
+}
+
+// Implement Display for easy printing of errors.
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(line) = self.line {
+            // Add 1 to line for 1-based display
+            write!(f, "Line {}: {}", line + 1, self.message)
+        } else {
+            write!(f, "{}", self.message)
+        }
+    }
+}
+
+// Implement standard Error trait.
+impl std::error::Error for ParseError {}
+
 /// 1文字ずつ走査し、区切り文字 `[]{} ,` を独立したトークンとして抽出します。
 /// 空白はすべてスキップし、その他の文字は一続きのバッファとしてまとめます。
 fn tokenize(s: &str) -> Vec<String> {
@@ -33,7 +57,7 @@ fn tokenize(s: &str) -> Vec<String> {
 fn parse_tokens(
     tokens: &[String],
     outer_prev: &[ScoreElement],
-) -> Result<Vec<ScoreElement>, String> {
+) -> Result<Vec<ScoreElement>, ParseError> {
     let mut elems = Vec::new();
     let mut idx = 0;
     while idx < tokens.len() {
@@ -54,7 +78,7 @@ fn parse_tokens(
                     end += 1;
                 }
                 if depth != 0 {
-                    return Err("Unmatched '['".into());
+                    return Err(ParseError { message: "Unmatched '['".into(), line: None });
                 }
                 let inner = &tokens[start..end - 1];
                 let mut combined = outer_prev.to_vec();
@@ -65,11 +89,9 @@ fn parse_tokens(
                     elements: sub_elems,
                     base_division,
                 }));
-// 対応する '}' を探す
                 idx = end;
             }
             "{" => {
-// 対応する '}' を探す
                 let mut depth = 1;
                 let start = idx + 1;
                 let mut end = start;
@@ -82,7 +104,7 @@ fn parse_tokens(
                     end += 1;
                 }
                 if depth != 0 {
-                    return Err("Unmatched '{'".into());
+                    return Err(ParseError { message: "Unmatched '{'".into(), line: None });
                 }
                 let inner = &tokens[start..end - 1];
                 let mut combined = outer_prev.to_vec();
@@ -93,14 +115,13 @@ fn parse_tokens(
                     if let ScoreElement::Event(ev) = se {
                         events.push(ev);
                     } else {
-                        return Err("Chord may contain only simple events".into());
+                        return Err(ParseError { message: "Chord may contain only simple events".into(), line: None });
                     }
                 }
                 elems.push(ScoreElement::Chord(Chord { events }));
                 idx = end;
             }
             tok => {
-// "r", "t", "72-", "C#4" など
                 let mut combined = outer_prev.to_vec();
                 combined.extend(elems.clone());
                 let se = parse_token(tok, &combined)?;
@@ -113,8 +134,7 @@ fn parse_tokens(
 }
 
 /// 単一トークンの解釈。tie("t"), rest("r"), note などを処理。
-fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, String> {
-// Rest
+fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, ParseError> {
     if token == "r" {
         return Ok(ScoreElement::Event(Event {
             event_type: EventType::Rest,
@@ -124,16 +144,16 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Strin
             duration: 1.0,
         }));
     }
-// Tie continuation
     if token == "t" {
         return Ok(ScoreElement::Tie);
     }
-// Note (with optional trailing '-')
     let tie_flag = token.ends_with('-');
     let core = token.trim_end_matches('-');
     let pitch = core.parse::<Pitch>()
-        .map_err(|e| format!("Invalid pitch `{}`: {}", core, e))?;
-// pitch_cents = MIDI note number * 100
+        .map_err(|e| ParseError {
+            message: format!("Invalid pitch `{}`: {}", core, e),
+            line: None,
+        })?;
     let pitch_cents = match pitch.to_midi_number() {
         Ok(n) => Some((n as u16) * 100),
         Err(_) => None,
@@ -159,178 +179,169 @@ fn remove_comments_multiline(input: &str) -> String {
         if !in_block && c == '/' {
             if let Some(&next) = chars.peek() {
                 if next == '/' {
-                    // Line comment: skip until newline, but keep the newline
-                    for nc in chars.by_ref() { // Changed from while let
+                    for nc in chars.by_ref() {
                         if nc == '\n' {
                             result.push('\n');
                             break;
                         }
                     }
-                    continue; // Move to next character after newline or end of input
+                    continue;
                 } else if next == '*' {
-                    // Start block comment
                     in_block = true;
-                    chars.next(); // Consume '*'
-                    continue; // Move to next character
+                    chars.next();
+                    continue;
                 } else {
-                    // Not a comment start, just a '/'
                     result.push(c);
                 }
             } else {
-                // End of input after '/'
                 result.push(c);
             }
         } else if in_block && c == '*' {
             if let Some(&next) = chars.peek() {
                 if next == '/' {
-                    // End block comment
                     in_block = false;
-                    chars.next(); // Consume '/'
-                    continue; // Move to next character
+                    chars.next();
+                    continue;
                 }
-                // else: Just a '*' within the comment, ignore it
             }
-            // else: End of input after '*', ignore it
-        } else if !in_block { // Changed from else { if ... }
-            // Not in a block comment, keep the character
+        } else if !in_block {
             result.push(c);
-        } else if c == '\n' { // Changed from else if inside else block
-            // Inside a block comment, but keep newline for line counting
+        } else if c == '\n' {
             result.push('\n');
         }
-        // else: Inside block comment, ignore the character (unless newline) - This case is implicitly handled now
     }
     result
 }
 
 /// テキスト入力をトークナイズ→パースして Score に変換します。
-pub fn parse_score(input: &str) -> Result<Score, String> {
-    // Remove comments from the entire input first
+pub fn parse_score(input: &str) -> Result<Score, ParseError> {
     let cleaned_input = remove_comments_multiline(input);
-
     let mut measures = Vec::new();
     let mut current_meter: Option<(usize, usize)> = None;
 
-    // Iterate over the lines of the cleaned input
     for (line_idx, line_content) in cleaned_input.lines().enumerate() {
-        let line_no = line_idx + 1; // Line number in the *cleaned* input
-        let line = line_content.trim(); // Trim whitespace from the line itself
+        let line = line_content.trim();
         if line.is_empty() {
-            continue; // Skip empty lines (were potentially comment-only lines)
+            continue;
         }
 
-        // Extract measure number (e.g., "1:") for error reporting
-        let (measure_no, line_after_measure_no) = if let Some(idx) = line.find(':') {
-            let num_str = &line[..idx].trim();
-            let num = num_str.parse::<usize>().unwrap_or(line_no); // Use line_no as fallback
-            (num, line[idx + 1..].trim())
-        } else {
-            (line_no, line) // Assume line number is measure number if no ':'
+        let (measure_no, line_after_measure_no) = match line.find(':') {
+            Some(idx) => {
+                let num_str = line[..idx].trim();
+                if num_str.is_empty() {
+                    return Err(ParseError {
+                        message: "Measure number is missing before ':'".to_string(),
+                        line: Some(line_idx),
+                    });
+                }
+                match num_str.parse::<usize>() {
+                    Ok(num) => (num, line[idx + 1..].trim()),
+                    Err(_) => {
+                        return Err(ParseError {
+                            message: format!("Invalid measure number '{}'", num_str),
+                            line: Some(line_idx),
+                        });
+                    }
+                }
+            }
+            None => {
+                return Err(ParseError {
+                    message: "Measure number separator ':' is missing".to_string(),
+                    line: Some(line_idx),
+                });
+            }
         };
 
-        // Detect meter
         let (meter, content) = if let Some((meter_part, rest)) = line_after_measure_no.split_once(' ') {
             if let Some((num, denom)) = parse_meter(meter_part) {
                 (Some((num, denom)), rest.trim())
             } else {
-                // No valid meter found, treat the whole line as content (without meter)
                 (None, line_after_measure_no)
             }
         } else {
-            // No space found, treat the whole line as content (without meter)
             (None, line_after_measure_no)
         };
 
-        // Error if no meter in the first *non-empty, non-comment* measure line
-        if current_meter.is_none() && meter.is_none() && !measures.is_empty() {
-             // Allow meterless lines if meter is already set
-        } else if current_meter.is_none() && meter.is_none() {
-             return Err(format!(
-                 "Line {} (Measure {}): No meter specified in the first measure",
-                 line_no, measure_no
-             ));
-        }
-
-        // Update meter if specified on this line
-        if let Some(m) = meter {
+        if current_meter.is_none() && meter.is_none() && measures.is_empty() {
+            return Err(ParseError {
+                message: format!("No meter specified in the first measure (Measure {})", measure_no),
+                line: Some(line_idx),
+            });
+        } else if current_meter.is_none() && meter.is_none() && !measures.is_empty() {
+        } else if let Some(m) = meter {
             current_meter = Some(m);
         }
 
-        // If content is empty after removing meter, skip (e.g., "1: 4/4")
         if content.is_empty() {
-             // If only meter was specified, update and continue
-             if meter.is_some() { continue; }
-             // Otherwise, it might be an empty measure line, handle as needed or error
-             // For now, let's assume content is required if no meter is specified here
-             return Err(format!(
-                 "Line {} (Measure {}): No content found",
-                 line_no, measure_no
-             ));
+            if meter.is_some() { continue; }
+            return Err(ParseError {
+                message: format!("No content found after measure number/meter (Measure {})", measure_no),
+                line: Some(line_idx),
+            });
         }
 
-
-        // Ensure meter is set before proceeding
         let current_meter_val = match current_meter {
             Some(m) => m,
             None => {
-                 return Err(format!(
-                     "Line {} (Measure {}): Internal error: Meter not set before processing content",
-                     line_no, measure_no
-                 ));
+                return Err(ParseError {
+                    message: format!("Internal error: Meter not set (Measure {})", measure_no),
+                    line: Some(line_idx),
+                });
             }
         };
 
         let start = content.find('[')
-            .ok_or_else(|| format!("Line {} (Measure {}): missing '[' in content '{}'", line_no, measure_no, content))?;
+            .ok_or_else(|| ParseError {
+                message: format!("Missing '[' in content '{}' (Measure {})", content, measure_no),
+                line: Some(line_idx),
+            })?;
         let end = content.rfind(']')
-            .ok_or_else(|| format!("Line {} (Measure {}): missing ']'", line_no, measure_no))?;
+            .ok_or_else(|| ParseError {
+                message: format!("Missing ']' (Measure {})", measure_no),
+                line: Some(line_idx),
+            })?;
         let inner = &content[start + 1..end];
         let tokens = tokenize(inner);
 
-        // Split and parse by beat
         let mut beats = Vec::new();
         let mut beat_tokens = Vec::new();
         let mut depth = 0;
         for token in tokens {
             match token.as_str() {
-                "[" | "{" => {
-                    depth += 1;
-                    beat_tokens.push(token);
-                }
-                "]" | "}" => {
-                    depth -= 1;
-                    beat_tokens.push(token);
-                }
+                "[" | "{" => { depth += 1; beat_tokens.push(token); }
+                "]" | "}" => { depth -= 1; beat_tokens.push(token); }
                 "," if depth == 0 => {
-                    // Top-level comma as beat separator
                     if !beat_tokens.is_empty() {
                         beats.push(Beat {
-                            elements: parse_tokens(&beat_tokens, &[]).map_err(|e| format!("Line {} (Measure {}): {}", line_no, measure_no, e))?,
+                            elements: parse_tokens(&beat_tokens, &[]).map_err(|mut e| { e.line = e.line.or(Some(line_idx)); e })?,
                         });
                         beat_tokens.clear();
                     }
                 }
-                _ => {
-                    beat_tokens.push(token);
-                }
+                _ => { beat_tokens.push(token); }
             }
         }
-        // Last beat
         if !beat_tokens.is_empty() {
             beats.push(Beat {
-                elements: parse_tokens(&beat_tokens, &[]).map_err(|e| format!("Line {} (Measure {}): {}", line_no, measure_no, e))?,
+                elements: parse_tokens(&beat_tokens, &[]).map_err(|mut e| { e.line = e.line.or(Some(line_idx)); e })?,
             });
         }
 
-        // Beat count check
         if beats.len() != current_meter_val.0 {
-            return Err(format!(
-                "Line {} (Measure {}): Number of beats does not match meter (expected {}, got {})",
-                line_no, measure_no, current_meter_val.0, beats.len()
-            ));
+            return Err(ParseError {
+                message: format!(
+                    "Number of beats ({}) does not match meter ({}) (Measure {})",
+                    beats.len(), current_meter_val.0, measure_no
+                ),
+                line: Some(line_idx),
+            });
         }
 
-        measures.push(Measure { beats, meter: current_meter_val });
+        measures.push(Measure {
+            number: measure_no,
+            beats,
+            meter: current_meter_val,
+        });
     }
     Ok(Score { measures })
 }

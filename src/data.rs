@@ -12,8 +12,9 @@ pub struct Score {
 /// Measure represents a single measure and contains a collection of beats.
 #[derive(Debug, Clone)]
 pub struct Measure {
-    pub beats: Vec<Beat>,
+    pub number: usize, // 小節番号を追加
     pub meter: (usize, usize), // (numerator, denominator)
+    pub beats: Vec<Beat>,
 }
 
 /// Beat represents a single beat and stores ScoreElements that lie on a fixed grid.

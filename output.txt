@@ -2,6 +2,11 @@ Parsed Score:
 Score {
     measures: [
         Measure {
+            number: 1,
+            meter: (
+                4,
+                4,
+            ),
             beats: [
                 Beat {
                     elements: [
@@ -66,12 +71,13 @@ Score {
                     ],
                 },
             ],
+        },
+        Measure {
+            number: 2,
             meter: (
                 4,
                 4,
             ),
-        },
-        Measure {
             beats: [
                 Beat {
                     elements: [
@@ -174,12 +180,13 @@ Score {
                     ],
                 },
             ],
+        },
+        Measure {
+            number: 3,
             meter: (
                 4,
                 4,
             ),
-        },
-        Measure {
             beats: [
                 Beat {
                     elements: [
@@ -244,12 +251,13 @@ Score {
                     ],
                 },
             ],
+        },
+        Measure {
+            number: 4,
             meter: (
                 4,
                 4,
             ),
-        },
-        Measure {
             beats: [
                 Beat {
                     elements: [
@@ -366,12 +374,13 @@ Score {
                     ],
                 },
             ],
-            meter: (
-                4,
-                4,
-            ),
         },
         Measure {
+            number: 5,
+            meter: (
+                2,
+                4,
+            ),
             beats: [
                 Beat {
                     elements: [
@@ -472,175 +481,6 @@ Score {
                     ],
                 },
             ],
-            meter: (
-                2,
-                4,
-            ),
-        },
-        Measure {
-            beats: [
-                Beat {
-                    elements: [
-                        Chord(
-                            Chord {
-                                events: [
-                                    Event {
-                                        event_type: Note,
-                                        pitch: Some(
-                                            Midi(
-                                                71,
-                                            ),
-                                        ),
-                                        pitch_cents: Some(
-                                            7100,
-                                        ),
-                                        tie: true,
-                                        duration: 1.0,
-                                    },
-                                    Event {
-                                        event_type: Note,
-                                        pitch: Some(
-                                            Midi(
-                                                74,
-                                            ),
-                                        ),
-                                        pitch_cents: Some(
-                                            7400,
-                                        ),
-                                        tie: true,
-                                        duration: 1.0,
-                                    },
-                                    Event {
-                                        event_type: Note,
-                                        pitch: Some(
-                                            Midi(
-                                                79,
-                                            ),
-                                        ),
-                                        pitch_cents: Some(
-                                            7900,
-                                        ),
-                                        tie: false,
-                                        duration: 1.0,
-                                    },
-                                ],
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Tie,
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Tie,
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Chord(
-                            Chord {
-                                events: [
-                                    Event {
-                                        event_type: Note,
-                                        pitch: Some(
-                                            Midi(
-                                                72,
-                                            ),
-                                        ),
-                                        pitch_cents: Some(
-                                            7200,
-                                        ),
-                                        tie: false,
-                                        duration: 1.0,
-                                    },
-                                    Event {
-                                        event_type: Note,
-                                        pitch: Some(
-                                            Midi(
-                                                76,
-                                            ),
-                                        ),
-                                        pitch_cents: Some(
-                                            7600,
-                                        ),
-                                        tie: false,
-                                        duration: 1.0,
-                                    },
-                                    Event {
-                                        event_type: Note,
-                                        pitch: Some(
-                                            Midi(
-                                                79,
-                                            ),
-                                        ),
-                                        pitch_cents: Some(
-                                            7900,
-                                        ),
-                                        tie: false,
-                                        duration: 1.0,
-                                    },
-                                ],
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Tie,
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Tie,
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Event(
-                            Event {
-                                event_type: Rest,
-                                pitch: None,
-                                pitch_cents: None,
-                                tie: false,
-                                duration: 1.0,
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Event(
-                            Event {
-                                event_type: Rest,
-                                pitch: None,
-                                pitch_cents: None,
-                                tie: false,
-                                duration: 1.0,
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    elements: [
-                        Event(
-                            Event {
-                                event_type: Rest,
-                                pitch: None,
-                                pitch_cents: None,
-                                tie: false,
-                                duration: 1.0,
-                            },
-                        ),
-                    ],
-                },
-            ],
-            meter: (
-                9,
-                8,
-            ),
         },
     ],
 }

@@ -2,8 +2,9 @@ use tower_lsp::{LspService, Server, Client};
 use tower_lsp::lsp_types::*;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::LanguageServer;
-// 修正: 正しいクレート名をインポート
-use vec_score_drawer::parser::parse_score;
+// 仮定: parse_score は Result<_, ParseError> を返し、ParseError に line: Option<usize> がある
+// ParseError 型を vec_score_drawer からインポートする必要があります。
+use vec_score_drawer::parser::{parse_score, ParseError}; // ParseError をインポート (仮)
 
 #[derive(Debug)]
 struct Backend {
@@ -12,12 +13,11 @@ struct Backend {
 
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
-    // `_params` に変更して警告を抑制
     async fn initialize(&self, _params: InitializeParams) -> Result<InitializeResult> {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 text_document_sync: Some(TextDocumentSyncCapability::Kind(
-                    TextDocumentSyncKind::FULL, // ← FULL に変更して試す
+                    TextDocumentSyncKind::FULL,
                 )),
                 ..Default::default()
             },
@@ -36,66 +36,56 @@ impl LanguageServer for Backend {
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        let text = params.content_changes[0].text.clone();
-        self.validate(&params.text_document.uri, &text).await;
+        // FULL sync なので、常に最初の変更が全文になる
+        if let Some(change) = params.content_changes.first() {
+             self.validate(&params.text_document.uri, &change.text).await;
+        }
     }
 }
 
 impl Backend {
     /// text を parse_score に投げてエラーがあれば Diagnostic を返し、クライアントへ送信
     async fn validate(&self, uri: &Url, text: &str) {
-        // --- Debug Output Start ---
         self.client.log_message(MessageType::INFO, format!("Validating URI: {}", uri)).await;
-        // Be cautious logging the full text if it can be very large
-        // self.client.log_message(MessageType::INFO, format!("Text to validate:\n{}", text)).await;
-        // --- Debug Output End ---
 
         let mut diagnostics = Vec::new();
 
         match parse_score(text) {
             Ok(_) => {
-                // --- Debug Output ---
                 self.client.log_message(MessageType::INFO, "Parse successful.").await;
-                // Ok の場合は Diagnostic をクリアする
+                // Ok の場合は Diagnostic をクリアする (空の Vec を publish する)
             }
-            Err(err_msg) => {
-                // --- Debug Output ---
-                self.client.log_message(MessageType::ERROR, format!("Parse error: {}", err_msg)).await;
+            // Err の型を ParseError (仮) に変更
+            Err(err) => { // err は ParseError 型を期待
+                self.client.log_message(MessageType::ERROR, format!("Parse error: {}", err)).await; // エラーメッセージ自体はそのままログに出力
 
-                // デフォルトは先頭行
-                let mut line_idx = 0;
-                let mut char_end = text.lines().next().unwrap_or("").len() as u32;
+                // ParseError から行番号を取得 (0-based index を期待)
+                // なければデフォルトで 0 行目
+                let line_idx = err.line.unwrap_or(0);
 
-                // メッセージ中の "Line N" を探す
-                if let Some(pos) = err_msg.find("Line ") {
-                    let rest = &err_msg[pos + "Line ".len()..];
-                    if let Some(num_str) = rest.split_whitespace().next() {
-                        if let Ok(n) = num_str.parse::<usize>() {
-                            if n > 0 {
-                                line_idx = n - 1;
-                                if let Some(line_text) = text.lines().nth(line_idx) {
-                                    char_end = line_text.len() as u32;
-                                }
-                            }
-                        }
-                    }
-                }
+                // エラー行のテキストを取得し、その長さを終了位置とする
+                // 行が存在しない場合はデフォルトで 0
+                let char_end = text.lines()
+                                   .nth(line_idx)
+                                   .map_or(0, |line_text| line_text.len()) as u32;
 
                 let range = Range {
                     start: Position { line: line_idx as u32, character: 0 },
+                    // 行全体をエラー範囲とする
                     end:   Position { line: line_idx as u32, character: char_end },
                 };
                 diagnostics.push(Diagnostic {
                     range,
                     severity: Some(DiagnosticSeverity::ERROR),
-                    message: err_msg,
+                    // エラーメッセージは ParseError の Display 実装を使うか、err.message フィールドを使う
+                    message: err.to_string(), // または err.message
                     source: Some("VecScoreParser".to_string()),
                     ..Default::default()
                 });
             }
         }
 
-        // Publish diagnostics (even if empty to clear previous errors)
+        // Publish diagnostics (エラーがない場合は空の Vec を送ることでクリアされる)
         self.client
             .publish_diagnostics(uri.clone(), diagnostics, None)
             .await;
