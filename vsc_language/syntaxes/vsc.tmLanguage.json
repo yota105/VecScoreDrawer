@@ -2,6 +2,22 @@
   "scopeName": "source.vsc",
   "patterns": [
     {
+      "name": "entity.name.section.measure.vsc",
+      "match": "^(\\d+):"
+    },
+    {
+      "name": "constant.numeric.meter.vsc",
+      "match": "(?<=: )\\d+/\\d+"
+    },
+    {
+      "name": "punctuation.section.brackets.square.vsc",
+      "match": "[\\[\\]]"
+    },
+    {
+      "name": "punctuation.section.brackets.curly.vsc",
+      "match": "[{}]"
+    },
+    {
       "name": "comment.line.double-slash.vsc",
       "match": "//.*$"
     },

@@ -28,6 +28,11 @@ fn main() {
                 println!("Score successfully written to {}", output_file);
             }
         },
-        Err(err) => eprintln!("Parse error: {}", err),
+        Err(errs) => {
+            eprintln!("Parse error(s):");
+            for err in errs {
+                eprintln!("  {}", err);
+            }
+        }
     }
 }

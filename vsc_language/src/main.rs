@@ -55,37 +55,28 @@ impl Backend {
                 self.client.log_message(MessageType::INFO, "Parse successful.").await;
                 // Ok の場合は Diagnostic をクリアする (空の Vec を publish する)
             }
-            // Err の型を ParseError (仮) に変更
-            Err(err) => { // err は ParseError 型を期待
-                self.client.log_message(MessageType::ERROR, format!("Parse error: {}", err)).await; // エラーメッセージ自体はそのままログに出力
-
-                // ParseError から行番号を取得 (0-based index を期待)
-                // なければデフォルトで 0 行目
-                let line_idx = err.line.unwrap_or(0);
-
-                // エラー行のテキストを取得し、その長さを終了位置とする
-                // 行が存在しない場合はデフォルトで 0
-                let char_end = text.lines()
-                                   .nth(line_idx)
-                                   .map_or(0, |line_text| line_text.len()) as u32;
-
-                let range = Range {
-                    start: Position { line: line_idx as u32, character: 0 },
-                    // 行全体をエラー範囲とする
-                    end:   Position { line: line_idx as u32, character: char_end },
-                };
-                diagnostics.push(Diagnostic {
-                    range,
-                    severity: Some(DiagnosticSeverity::ERROR),
-                    // エラーメッセージは ParseError の Display 実装を使うか、err.message フィールドを使う
-                    message: err.to_string(), // または err.message
-                    source: Some("VecScoreParser".to_string()),
-                    ..Default::default()
-                });
+            Err(errs) => {
+                for err in errs {
+                    self.client.log_message(MessageType::ERROR, format!("Parse error: {}", err)).await;
+                    let line_idx = err.line.unwrap_or(0);
+                    let char_end = text.lines()
+                                       .nth(line_idx)
+                                       .map_or(0, |line_text| line_text.len()) as u32;
+                    let range = Range {
+                        start: Position { line: line_idx as u32, character: 0 },
+                        end:   Position { line: line_idx as u32, character: char_end },
+                    };
+                    diagnostics.push(Diagnostic {
+                        range,
+                        severity: Some(DiagnosticSeverity::ERROR),
+                        message: err.to_string(),
+                        source: Some("VecScoreParser".to_string()),
+                        ..Default::default()
+                    });
+                }
             }
         }
 
-        // Publish diagnostics (エラーがない場合は空の Vec を送ることでクリアされる)
         self.client
             .publish_diagnostics(uri.clone(), diagnostics, None)
             .await;

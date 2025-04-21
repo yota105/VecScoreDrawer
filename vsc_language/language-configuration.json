@@ -3,6 +3,11 @@
     "lineComment": "//",
     "blockComment": ["/*", "*/"]
   },
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"]
+  ],
   "scopeName": "source.vsc",
   "patterns": [
     { "include": "#comments" },

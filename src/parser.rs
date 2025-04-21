@@ -214,10 +214,12 @@ fn remove_comments_multiline(input: &str) -> String {
 }
 
 /// テキスト入力をトークナイズ→パースして Score に変換します。
-pub fn parse_score(input: &str) -> Result<Score, ParseError> {
+/// 複数エラーをVec<ParseError>で返す
+pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
     let cleaned_input = remove_comments_multiline(input);
     let mut measures = Vec::new();
     let mut current_meter: Option<(usize, usize)> = None;
+    let mut errors = Vec::new();
 
     for (line_idx, line_content) in cleaned_input.lines().enumerate() {
         let line = line_content.trim();
@@ -225,32 +227,44 @@ pub fn parse_score(input: &str) -> Result<Score, ParseError> {
             continue;
         }
 
-        let (measure_no, line_after_measure_no) = match line.find(':') {
+        let mut line_errors = Vec::new();
+        let mut measure_no = 0;
+        let mut line_after_measure_no = "";
+        // measure_no, line_after_measure_no の取得
+        match line.find(':') {
             Some(idx) => {
                 let num_str = line[..idx].trim();
                 if num_str.is_empty() {
-                    return Err(ParseError {
+                    line_errors.push(ParseError {
                         message: "Measure number is missing before ':'".to_string(),
                         line: Some(line_idx),
                     });
-                }
-                match num_str.parse::<usize>() {
-                    Ok(num) => (num, line[idx + 1..].trim()),
-                    Err(_) => {
-                        return Err(ParseError {
-                            message: format!("Invalid measure number '{}'", num_str),
-                            line: Some(line_idx),
-                        });
+                } else {
+                    match num_str.parse::<usize>() {
+                        Ok(num) => {
+                            measure_no = num;
+                            line_after_measure_no = line[idx + 1..].trim();
+                        },
+                        Err(_) => {
+                            line_errors.push(ParseError {
+                                message: format!("Invalid measure number '{}'", num_str),
+                                line: Some(line_idx),
+                            });
+                        }
                     }
                 }
             }
             None => {
-                return Err(ParseError {
+                line_errors.push(ParseError {
                     message: "Measure number separator ':' is missing".to_string(),
                     line: Some(line_idx),
                 });
             }
-        };
+        }
+        if !line_errors.is_empty() {
+            errors.extend(line_errors);
+            continue;
+        }
 
         let (meter, content) = if let Some((meter_part, rest)) = line_after_measure_no.split_once(' ') {
             if let Some((num, denom)) = parse_meter(meter_part) {
@@ -263,58 +277,77 @@ pub fn parse_score(input: &str) -> Result<Score, ParseError> {
         };
 
         if current_meter.is_none() && meter.is_none() && measures.is_empty() {
-            return Err(ParseError {
+            errors.push(ParseError {
                 message: format!("No meter specified in the first measure (Measure {})", measure_no),
                 line: Some(line_idx),
             });
+            continue;
         } else if current_meter.is_none() && meter.is_none() && !measures.is_empty() {
+            // 何もしない
         } else if let Some(m) = meter {
             current_meter = Some(m);
         }
 
         if content.is_empty() {
             if meter.is_some() { continue; }
-            return Err(ParseError {
+            errors.push(ParseError {
                 message: format!("No content found after measure number/meter (Measure {})", measure_no),
                 line: Some(line_idx),
             });
+            continue;
         }
 
         let current_meter_val = match current_meter {
             Some(m) => m,
             None => {
-                return Err(ParseError {
+                errors.push(ParseError {
                     message: format!("Internal error: Meter not set (Measure {})", measure_no),
                     line: Some(line_idx),
                 });
+                continue;
             }
         };
 
-        let start = content.find('[')
-            .ok_or_else(|| ParseError {
-                message: format!("Missing '[' in content '{}' (Measure {})", content, measure_no),
-                line: Some(line_idx),
-            })?;
-        let end = content.rfind(']')
-            .ok_or_else(|| ParseError {
-                message: format!("Missing ']' (Measure {})", measure_no),
-                line: Some(line_idx),
-            })?;
+        let start = match content.find('[') {
+            Some(s) => s,
+            None => {
+                errors.push(ParseError {
+                    message: format!("Missing '[' in content '{}' (Measure {})", content, measure_no),
+                    line: Some(line_idx),
+                });
+                continue;
+            }
+        };
+        let end = match content.rfind(']') {
+            Some(e) => e,
+            None => {
+                errors.push(ParseError {
+                    message: format!("Missing ']' (Measure {})", measure_no),
+                    line: Some(line_idx),
+                });
+                continue;
+            }
+        };
         let inner = &content[start + 1..end];
         let tokens = tokenize(inner);
 
         let mut beats = Vec::new();
         let mut beat_tokens = Vec::new();
         let mut depth = 0;
+        let mut beat_errors = Vec::new();
         for token in tokens {
             match token.as_str() {
                 "[" | "{" => { depth += 1; beat_tokens.push(token); }
                 "]" | "}" => { depth -= 1; beat_tokens.push(token); }
                 "," if depth == 0 => {
                     if !beat_tokens.is_empty() {
-                        beats.push(Beat {
-                            elements: parse_tokens(&beat_tokens, &[]).map_err(|mut e| { e.line = e.line.or(Some(line_idx)); e })?,
-                        });
+                        match parse_tokens(&beat_tokens, &[]) {
+                            Ok(elements) => beats.push(Beat { elements }),
+                            Err(mut e) => {
+                                e.line = e.line.or(Some(line_idx));
+                                beat_errors.push(e);
+                            }
+                        }
                         beat_tokens.clear();
                     }
                 }
@@ -322,13 +355,21 @@ pub fn parse_score(input: &str) -> Result<Score, ParseError> {
             }
         }
         if !beat_tokens.is_empty() {
-            beats.push(Beat {
-                elements: parse_tokens(&beat_tokens, &[]).map_err(|mut e| { e.line = e.line.or(Some(line_idx)); e })?,
-            });
+            match parse_tokens(&beat_tokens, &[]) {
+                Ok(elements) => beats.push(Beat { elements }),
+                Err(mut e) => {
+                    e.line = e.line.or(Some(line_idx));
+                    beat_errors.push(e);
+                }
+            }
+        }
+        if !beat_errors.is_empty() {
+            errors.extend(beat_errors);
         }
 
+        // beats数のエラーは他のエラーと独立して追加
         if beats.len() != current_meter_val.0 {
-            return Err(ParseError {
+            errors.push(ParseError {
                 message: format!(
                     "Number of beats ({}) does not match meter ({}) (Measure {})",
                     beats.len(), current_meter_val.0, measure_no
@@ -337,13 +378,20 @@ pub fn parse_score(input: &str) -> Result<Score, ParseError> {
             });
         }
 
-        measures.push(Measure {
-            number: measure_no,
-            beats,
-            meter: current_meter_val,
-        });
+        // beatsが空でもmeasures.pushはしない（ただし他のエラーは収集）
+        if !beats.is_empty() {
+            measures.push(Measure {
+                number: measure_no,
+                beats,
+                meter: current_meter_val,
+            });
+        }
     }
-    Ok(Score { measures })
+    if errors.is_empty() {
+        Ok(Score { measures })
+    } else {
+        Err(errors)
+    }
 }
 
 /// "4/4" のような文字列を (4,4) に変換

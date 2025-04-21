@@ -482,5 +482,171 @@ Score {
                 },
             ],
         },
+        Measure {
+            number: 6,
+            meter: (
+                9,
+                8,
+            ),
+            beats: [
+                Beat {
+                    elements: [
+                        Chord(
+                            Chord {
+                                events: [
+                                    Event {
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                71,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7100,
+                                        ),
+                                        tie: true,
+                                        duration: 1.0,
+                                    },
+                                    Event {
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                74,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7400,
+                                        ),
+                                        tie: true,
+                                        duration: 1.0,
+                                    },
+                                    Event {
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: true,
+                                        duration: 1.0,
+                                    },
+                                ],
+                            },
+                        ),
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Tie,
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Tie,
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Chord(
+                            Chord {
+                                events: [
+                                    Event {
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                72,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7200,
+                                        ),
+                                        tie: true,
+                                        duration: 1.0,
+                                    },
+                                    Event {
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                76,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7600,
+                                        ),
+                                        tie: true,
+                                        duration: 1.0,
+                                    },
+                                    Event {
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: true,
+                                        duration: 1.0,
+                                    },
+                                ],
+                            },
+                        ),
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Tie,
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Tie,
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Event(
+                            Event {
+                                event_type: Rest,
+                                pitch: None,
+                                pitch_cents: None,
+                                tie: false,
+                                duration: 1.0,
+                            },
+                        ),
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Event(
+                            Event {
+                                event_type: Rest,
+                                pitch: None,
+                                pitch_cents: None,
+                                tie: false,
+                                duration: 1.0,
+                            },
+                        ),
+                    ],
+                },
+                Beat {
+                    elements: [
+                        Event(
+                            Event {
+                                event_type: Rest,
+                                pitch: None,
+                                pitch_cents: None,
+                                tie: false,
+                                duration: 1.0,
+                            },
+                        ),
+                    ],
+                },
+            ],
+        },
     ],
 }
