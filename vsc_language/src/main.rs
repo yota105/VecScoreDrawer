@@ -77,6 +77,11 @@ impl Backend {
             }
         }
 
+        self.client.log_message(
+            MessageType::INFO,
+            format!("Diagnostics count: {}", diagnostics.len())
+        ).await;
+
         self.client
             .publish_diagnostics(uri.clone(), diagnostics, None)
             .await;
