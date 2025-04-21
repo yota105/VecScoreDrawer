@@ -2,5 +2,76 @@
   "comments": {
     "lineComment": "//",
     "blockComment": ["/*", "*/"]
+  },
+  "scopeName": "source.vsc",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#brackets-level1" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.vsc",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.vsc",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "brackets-level1": {
+      "name": "meta.brackets.level-1.vsc",
+      "begin": "\\[",
+      "end": "\\]",
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#brackets-level2" },
+        { "include": "#keywords" },
+        { "include": "#numbers" },
+        { "include": "#chords" }
+      ]
+    },
+    "brackets-level2": {
+      "name": "meta.brackets.level-2.vsc",
+      "begin": "\\[",
+      "end": "\\]",
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#brackets-level3" },
+        { "include": "#keywords" },
+        { "include": "#numbers" },
+        { "include": "#chords" }
+      ]
+    },
+    "brackets-level3": {
+      "name": "meta.brackets.level-3.vsc",
+      "begin": "\\[",
+      "end": "\\]",
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#keywords" },
+        { "include": "#numbers" },
+        { "include": "#chords" }
+      ]
+    },
+    "keywords": {
+      "match": "\\b(t|r)\\b",
+      "name": "keyword.other.vsc"
+    },
+    "numbers": {
+      "match": "\\d+\\-?",
+      "name": "constant.numeric.vsc"
+    },
+    "chords": {
+      "name": "entity.name.function.vsc",
+      "begin": "\\{",
+      "end": "\\}",
+      "patterns": [
+        { "include": "#numbers" }
+      ]
+    }
   }
 }

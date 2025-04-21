@@ -3,12 +3,19 @@
   "displayName": "VSC Language Support",
   "publisher": "NAKAMURA Yota",
   "version": "0.0.1",
+  "repository": "none",
   "engines": {
     "vscode": "^1.99.0"
   },
   "main": "./out/extension.js",
   "activationEvents": [
     "onLanguage:vsc"
+  ],
+  "files": [
+    "out/**",
+    "bin/vsc_lsp.exe",
+    "syntaxes/**",
+    "language-configuration.json"
   ],
   "contributes": {
     "languages": [
@@ -33,14 +40,17 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile"
+    "build:rust": "cargo build --release && copy .\\target\\release\\vsc_lsp.exe .\\bin\\vsc_lsp.exe",
+    "build:ts": "tsc -p ./",
+    "build": "npm run build:rust && npm run build:ts",
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
     "@types/node": "^16.11.7",
     "@types/vscode": "^1.99.1",
     "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.0.1"
   }
 }
