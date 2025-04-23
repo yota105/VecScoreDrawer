@@ -87,6 +87,14 @@ pub enum Accidental {
     Flat,
 }
 
+/// Duration: 整数部と分数部で表現する持続時間
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Duration {
+    pub int: i32,         // 整数部分
+    pub frac_num: i32,    // 分子（整数のみの場合は0）
+    pub frac_den: i32,    // 分母（0不可、整数のみの場合は1）
+}
+
 /// --- FromStr ------------------------------------------------------------------------------
 
 impl FromStr for Pitch {
