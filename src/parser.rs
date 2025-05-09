@@ -417,6 +417,8 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
             measures.push(Measure {
                 number: measure_no,
                 beats,
+                duration: 0.0,
+                unit_duration: 0.0,
                 meter: current_meter_val,
             });
         }

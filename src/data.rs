@@ -14,6 +14,8 @@ pub struct Score {
 pub struct Measure {
     pub number: usize, // 小節番号を追加
     pub meter: (usize, usize), // (numerator, denominator)
+    pub duration: f32,        // 小節全体のDuration（例: 4.0）
+    pub unit_duration: f32,   // 小節内の1単位のDuration（例: 1.0）
     pub beats: Vec<Beat>,
 }
 
