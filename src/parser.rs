@@ -1,5 +1,5 @@
 use crate::data::{
-    Score, Measure, Beat, ScoreElement, Event, EventType, Subdivision, Chord, Pitch,
+    Score, Measure, Beat, ScoreElement, Event, EventType, Subdivision, Chord, Pitch, Tie,
 };
 
 /// Represents a parsing error with an optional line number.
@@ -145,7 +145,41 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Parse
         }));
     }
     if token == "t" {
-        return Ok(ScoreElement::Tie);
+        // 直前の音符・タイ・和音からpitch/durationを取得
+        let mut last_pitch = None;
+        let mut last_pitch_cents = None;
+        let mut last_duration = 1.0;
+        for se in prev.iter().rev() {
+            match se {
+                ScoreElement::Event(ev) if ev.event_type == EventType::Note => {
+                    last_pitch = ev.pitch.clone();
+                    last_pitch_cents = ev.pitch_cents;
+                    last_duration = ev.duration;
+                    break;
+                }
+                ScoreElement::Tie(tie) => {
+                    last_pitch = tie.pitch.clone();
+                    last_pitch_cents = tie.pitch_cents;
+                    last_duration = tie.duration;
+                    break;
+                }
+                ScoreElement::Chord(chord) => {
+                    // 和音の場合は最初の音を参照（必要に応じて拡張）
+                    if let Some(ev) = chord.events.first() {
+                        last_pitch = ev.pitch.clone();
+                        last_pitch_cents = ev.pitch_cents;
+                        last_duration = ev.duration;
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        return Ok(ScoreElement::Tie(Tie {
+            pitch: last_pitch,
+            pitch_cents: last_pitch_cents,
+            duration: last_duration,
+        }));
     }
     let tie_flag = token.ends_with('-');
     let core = token.trim_end_matches('-');

@@ -29,7 +29,13 @@ Score {
                 },
                 Beat {
                     elements: [
-                        Tie,
+                        Tie(
+                            Tie {
+                                pitch: None,
+                                pitch_cents: None,
+                                duration: 1.0,
+                            },
+                        ),
                     ],
                 },
                 Beat {
@@ -103,7 +109,13 @@ Score {
                         Subdivision(
                             Subdivision {
                                 elements: [
-                                    Tie,
+                                    Tie(
+                                        Tie {
+                                            pitch: None,
+                                            pitch_cents: None,
+                                            duration: 1.0,
+                                        },
+                                    ),
                                     Subdivision(
                                         Subdivision {
                                             elements: [
@@ -209,7 +221,13 @@ Score {
                 },
                 Beat {
                     elements: [
-                        Tie,
+                        Tie(
+                            Tie {
+                                pitch: None,
+                                pitch_cents: None,
+                                duration: 1.0,
+                            },
+                        ),
                     ],
                 },
                 Beat {
@@ -540,12 +558,24 @@ Score {
                 },
                 Beat {
                     elements: [
-                        Tie,
+                        Tie(
+                            Tie {
+                                pitch: None,
+                                pitch_cents: None,
+                                duration: 1.0,
+                            },
+                        ),
                     ],
                 },
                 Beat {
                     elements: [
-                        Tie,
+                        Tie(
+                            Tie {
+                                pitch: None,
+                                pitch_cents: None,
+                                duration: 1.0,
+                            },
+                        ),
                     ],
                 },
                 Beat {
@@ -599,12 +629,24 @@ Score {
                 },
                 Beat {
                     elements: [
-                        Tie,
+                        Tie(
+                            Tie {
+                                pitch: None,
+                                pitch_cents: None,
+                                duration: 1.0,
+                            },
+                        ),
                     ],
                 },
                 Beat {
                     elements: [
-                        Tie,
+                        Tie(
+                            Tie {
+                                pitch: None,
+                                pitch_cents: None,
+                                duration: 1.0,
+                            },
+                        ),
                     ],
                 },
                 Beat {

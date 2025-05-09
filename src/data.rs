@@ -29,7 +29,15 @@ pub enum ScoreElement {
     Event(Event),          // simple note / rest
     Subdivision(Subdivision),
     Chord(Chord),
-    Tie,                   // tie‑continuation marker
+    Tie(Tie),             // tie‑continuation marker（音高・Duration付き）
+}
+
+/// Tie represents a tie continuation with pitch and duration.
+#[derive(Debug, Clone)]
+pub struct Tie {
+    pub pitch: Option<Pitch>,
+    pub pitch_cents: Option<u16>,
+    pub duration: f32,
 }
 
 /// Event represents a single note or rest.
@@ -44,7 +52,7 @@ pub struct Event {
 }
 
 /// EventType distinguishes between notes and rests.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum EventType {
     Note,
     Rest,
