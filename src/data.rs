@@ -40,7 +40,7 @@ pub enum ScoreElement {
 pub struct Tie {
     pub pitch: Option<Pitch>,
     pub pitch_cents: Option<u16>,
-    pub duration: f32,
+    pub duration: num_rational::Ratio<i32>, // 分数で保持
 }
 
 /// Event represents a single note or rest.
@@ -51,7 +51,7 @@ pub struct Event {
     /// MIDI note number × 100 ( = cents )。rest のときは None
     pub pitch_cents: Option<u16>,
     pub tie: bool,
-    pub duration: f32,
+    pub duration: num_rational::Ratio<i32>, // 分数で保持
 }
 
 /// EventType distinguishes between notes and rests.

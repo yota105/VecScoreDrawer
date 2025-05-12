@@ -141,14 +141,14 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Parse
             pitch: None,
             pitch_cents: None,
             tie: false,
-            duration: 1.0,
+            duration: num_rational::Ratio::from_integer(1),
         }));
     }
     if token == "t" {
         // 直前の音符・タイ・和音からpitch/durationを取得
         let mut last_pitch = None;
         let mut last_pitch_cents = None;
-        let mut last_duration = 1.0;
+        let mut last_duration = num_rational::Ratio::from_integer(1);
         for se in prev.iter().rev() {
             match se {
                 ScoreElement::Event(ev) if ev.event_type == EventType::Note => {
@@ -164,7 +164,6 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Parse
                     break;
                 }
                 ScoreElement::Chord(chord) => {
-                    // 和音の場合は最初の音を参照（必要に応じて拡張）
                     if let Some(ev) = chord.events.first() {
                         last_pitch = ev.pitch.clone();
                         last_pitch_cents = ev.pitch_cents;
@@ -197,7 +196,7 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Parse
         pitch: Some(pitch),
         pitch_cents,
         tie: tie_flag,
-        duration: 1.0,
+        duration: num_rational::Ratio::from_integer(1),
     }))
 }
 

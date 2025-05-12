@@ -1,16 +1,15 @@
 use crate::data::{Score, ScoreElement};
 use num_rational::Ratio;
-use num_traits::cast::ToPrimitive;
 
 /// ScoreElementのDurationを再帰的に割り当てる（分数で計算）
 fn assign_element_durations(elements: &mut [ScoreElement], duration: Ratio<i32>) {
     for elem in elements {
         match elem {
             ScoreElement::Event(ev) => {
-                ev.duration = duration.to_f32().unwrap_or(0.0);
+                ev.duration = duration;
             }
             ScoreElement::Tie(tie) => {
-                tie.duration = duration.to_f32().unwrap_or(0.0);
+                tie.duration = duration;
             }
             ScoreElement::Subdivision(sub) => {
                 let div = sub.base_division as i32;
@@ -19,7 +18,7 @@ fn assign_element_durations(elements: &mut [ScoreElement], duration: Ratio<i32>)
             }
             ScoreElement::Chord(chord) => {
                 for ev in &mut chord.events {
-                    ev.duration = duration.to_f32().unwrap_or(0.0);
+                    ev.duration = duration;
                 }
             }
         }
