@@ -376,7 +376,7 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
                 "," if depth == 0 => {
                     if !beat_tokens.is_empty() {
                         match parse_tokens(&beat_tokens, &[]) {
-                            Ok(elements) => beats.push(Beat { elements }),
+                            Ok(elements) => beats.push(Beat { elements, duration: 0.0 }),
                             Err(mut e) => {
                                 e.line = e.line.or(Some(line_idx));
                                 beat_errors.push(e);
@@ -390,7 +390,7 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
         }
         if !beat_tokens.is_empty() {
             match parse_tokens(&beat_tokens, &[]) {
-                Ok(elements) => beats.push(Beat { elements }),
+                Ok(elements) => beats.push(Beat { elements, duration: 0.0 }),
                 Err(mut e) => {
                     e.line = e.line.or(Some(line_idx));
                     beat_errors.push(e);

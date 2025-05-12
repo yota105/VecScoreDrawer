@@ -2160,6 +2160,7 @@ dependencies = [
  "anyhow",
  "clap 4.5.36",
  "num-rational",
+ "num-traits",
  "printpdf",
  "rusttype",
  "serde",

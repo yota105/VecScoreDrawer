@@ -22,6 +22,7 @@ pub struct Measure {
 /// Beat represents a single beat and stores ScoreElements that lie on a fixed grid.
 #[derive(Debug, Clone)]
 pub struct Beat {
+    pub duration: f32, // 拍のDurationを追加
     pub elements: Vec<ScoreElement>,
 }
 
@@ -63,8 +64,8 @@ pub enum EventType {
 /// Subdivision is used when subdividing a basic unit further (e.g., tuplets).
 #[derive(Debug, Clone)]
 pub struct Subdivision {
-    pub elements: Vec<ScoreElement>,
     pub base_division: u32,
+    pub elements: Vec<ScoreElement>,
 }
 
 /// Chord represents a chord with multiple simultaneous sounding events.
