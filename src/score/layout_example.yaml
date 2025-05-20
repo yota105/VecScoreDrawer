@@ -1,16 +1,4 @@
-# score モジュール
-
-楽譜（意味層）のデータ型・パーサ・レイアウト情報を管理します。
-- model.rs: 楽譜のデータ型
-- parser.rs: 楽譜定義ファイルのパーサ
-- layout.rs: レイアウト情報
-
-## レイアウト定義ファイル例
-
-`layout_example.yaml` は、YAML形式で楽譜のレイアウトや内容を定義するサンプルです。  
-テンポ変更、パート構成、譜表の種類、音符の臨時記号やアーティキュレーションなどを柔軟に記述できます。
-
-```yaml
+# 楽譜レイアウト定義ファイル例 (YAML)
 score:
   tempo_changes:
     - measure: 1
@@ -47,6 +35,3 @@ score:
         - pitch: "E5"
           accidental: "flat"
           articulation: "staccato"
-```
-
-このファイルを参考に、GUIや手動編集でレイアウト定義を行ってください。

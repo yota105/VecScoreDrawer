@@ -38,6 +38,8 @@ pub enum ScoreElement {
 /// Tie represents a tie continuation with pitch and duration.
 #[derive(Debug, Clone)]
 pub struct Tie {
+    /// Unique ID for this tie object
+    pub id: Option<u64>,
     pub pitch: Option<Pitch>,
     pub pitch_cents: Option<u16>,
     pub duration: num_rational::Ratio<i32>, // 分数で保持
@@ -46,6 +48,8 @@ pub struct Tie {
 /// Event represents a single note or rest.
 #[derive(Debug, Clone)]
 pub struct Event {
+    /// Unique ID for this event object
+    pub id: Option<u64>,
     pub event_type: EventType,
     pub pitch: Option<Pitch>,
     /// MIDI note number × 100 ( = cents )。rest のときは None
@@ -71,6 +75,8 @@ pub struct Subdivision {
 /// Chord represents a chord with multiple simultaneous sounding events.
 #[derive(Debug, Clone)]
 pub struct Chord {
+    /// Unique ID for this chord object
+    pub id: Option<u64>,
     pub events: Vec<Event>,
 }
 
@@ -104,6 +110,49 @@ pub struct Duration {
     pub int: i32,         // 整数部分
     pub frac_num: i32,    // 分子（整数のみの場合は0）
     pub frac_den: i32,    // 分母（0不可、整数のみの場合は1）
+}
+
+use std::collections::HashSet;
+
+/// --- Unique ID generator for score objects ---
+pub struct IdGenerator {
+    current: u64,
+    used: HashSet<u64>,
+}
+
+impl IdGenerator {
+    /// 新しい一意なIDを生成し、管理セットに追加
+    pub fn next_id(&mut self) -> u64 {
+        loop {
+            self.current += 1;
+            if !self.used.contains(&self.current) {
+                self.used.insert(self.current);
+                return self.current;
+            }
+        }
+    }
+    /// 既存IDを登録（重複時は新IDを返す）
+    pub fn register_or_new(&mut self, id: u64) -> u64 {
+        if self.used.contains(&id) {
+            self.next_id()
+        } else {
+            self.used.insert(id);
+            id
+        }
+    }
+    /// IDを削除（オブジェクト削除時に呼ぶ）
+    pub fn remove(&mut self, id: u64) {
+        self.used.remove(&id);
+    }
+}
+
+impl Default for IdGenerator {
+    fn default() -> Self {
+        Self {
+            current: 0,
+            used: HashSet::new(),
+        }
+    }
 }
 
 /// --- FromStr ------------------------------------------------------------------------------

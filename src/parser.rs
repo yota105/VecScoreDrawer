@@ -54,9 +54,12 @@ fn tokenize(s: &str) -> Vec<String> {
 
 /// トークン列を再帰的にパースして ScoreElement のベクタを返します。
 /// `outer_prev` はこのレベルの前にあった要素（tie の解決に利用）。
+use crate::data::IdGenerator;
+
 fn parse_tokens(
     tokens: &[String],
     outer_prev: &[ScoreElement],
+    id_gen: &mut IdGenerator,
 ) -> Result<Vec<ScoreElement>, ParseError> {
     let mut elems = Vec::new();
     let mut idx = 0;
@@ -83,7 +86,7 @@ fn parse_tokens(
                 let inner = &tokens[start..end - 1];
                 let mut combined = outer_prev.to_vec();
                 combined.extend(elems.clone());
-                let sub_elems = parse_tokens(inner, &combined)?;
+                let sub_elems = parse_tokens(inner, &combined, id_gen)?;
                 let base_division = sub_elems.len() as u32;
                 elems.push(ScoreElement::Subdivision(Subdivision {
                     elements: sub_elems,
@@ -109,7 +112,7 @@ fn parse_tokens(
                 let inner = &tokens[start..end - 1];
                 let mut combined = outer_prev.to_vec();
                 combined.extend(elems.clone());
-                let chord_elems = parse_tokens(inner, &combined)?;
+                let chord_elems = parse_tokens(inner, &combined, id_gen)?;
                 let mut events = Vec::new();
                 for se in chord_elems {
                     if let ScoreElement::Event(ev) = se {
@@ -118,13 +121,13 @@ fn parse_tokens(
                         return Err(ParseError { message: "Chord may contain only simple events".into(), line: None });
                     }
                 }
-                elems.push(ScoreElement::Chord(Chord { events }));
+                elems.push(ScoreElement::Chord(Chord { id: Some(id_gen.next_id()), events }));
                 idx = end;
             }
             tok => {
                 let mut combined = outer_prev.to_vec();
                 combined.extend(elems.clone());
-                let se = parse_token(tok, &combined)?;
+                let se = parse_token(tok, &combined, id_gen)?;
                 elems.push(se);
                 idx += 1;
             }
@@ -134,9 +137,10 @@ fn parse_tokens(
 }
 
 /// 単一トークンの解釈。tie("t"), rest("r"), note などを処理。
-fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, ParseError> {
+fn parse_token(token: &str, prev: &[ScoreElement], id_gen: &mut IdGenerator) -> Result<ScoreElement, ParseError> {
     if token == "r" {
         return Ok(ScoreElement::Event(Event {
+            id: Some(id_gen.next_id()),
             event_type: EventType::Rest,
             pitch: None,
             pitch_cents: None,
@@ -175,6 +179,7 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Parse
             }
         }
         return Ok(ScoreElement::Tie(Tie {
+            id: Some(id_gen.next_id()),
             pitch: last_pitch,
             pitch_cents: last_pitch_cents,
             duration: last_duration,
@@ -192,6 +197,7 @@ fn parse_token(token: &str, prev: &[ScoreElement]) -> Result<ScoreElement, Parse
         Err(_) => None,
     };
     Ok(ScoreElement::Event(Event {
+        id: Some(id_gen.next_id()),
         event_type: EventType::Note,
         pitch: Some(pitch),
         pitch_cents,
@@ -368,13 +374,16 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
         let mut beat_tokens = Vec::new();
         let mut depth = 0;
         let mut beat_errors = Vec::new();
+        // --- ID生成用 ---
+        let mut id_gen = IdGenerator::default();
+
         for token in tokens {
             match token.as_str() {
                 "[" | "{" => { depth += 1; beat_tokens.push(token); }
                 "]" | "}" => { depth -= 1; beat_tokens.push(token); }
                 "," if depth == 0 => {
                     if !beat_tokens.is_empty() {
-                        match parse_tokens(&beat_tokens, &[]) {
+                        match parse_tokens(&beat_tokens, &[], &mut id_gen) {
                             Ok(elements) => beats.push(Beat { elements, duration: 0.0 }),
                             Err(mut e) => {
                                 e.line = e.line.or(Some(line_idx));
@@ -388,7 +397,7 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
             }
         }
         if !beat_tokens.is_empty() {
-            match parse_tokens(&beat_tokens, &[]) {
+            match parse_tokens(&beat_tokens, &[], &mut id_gen) {
                 Ok(elements) => beats.push(Beat { elements, duration: 0.0 }),
                 Err(mut e) => {
                     e.line = e.line.or(Some(line_idx));
