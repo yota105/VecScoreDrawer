@@ -15,7 +15,7 @@ score: スコアの単位を指します。scoreは以下のプロパティを�
     position (必須, f32, 1.0~999.999...): テンポを変更する位置です。何かしらのScoreElementの位置（分数で表現）と完全に一致しない場合、一番近いScoreElementの位置に設定されます。何かしらのScoreElementの位置（分数で表現）と十分に近い値でない場合、警告が出ます。また、VecScoreの当該measureにおける範囲外の場合、エラーとなります。
     strict_position(bool, デフォルトはfalse): trueの場合、何かしらのScoreElementと近い位置にある場合でも、絶対にその位置に設定します。
     bpm (tempo_markとどちらか必須, f32, 0.0~511.999...、デフォルトは120): 楽曲のbpmです。tempo_markと同時に設定することもできます。
-    tempo_mark (bpmとどちらか必須, 文字列): ユーザー定義のtempo_mark型に一致する場合はbpmが自動設定されます。一致しない場合はデフォルト値となります。bpmと同時指定時はbpmが優先されます。(後でテンポ変化実装)
+    tempo_mark (bpmとどちらか必須, 文字列): ユーザー定義のTempoMark型に一致する場合はbpmが自動設定されます。一致しない場合はデフォルト値となります。bpmと同時指定時はbpmが優先されます。(後でテンポ変化実装)
 
   key_signature: 調号を示します。未設定の場合、measure: 1, position: 1.0, noneになります。key_signatureは以下のプロパティを持ちます: measure, position, key
     measure (必須, i32, 1以上): 調号を変更する小節番号です。key_signatureがmeasure: 1における値を持たない場合とVecScoreに記された範囲外の値を指定した場合、エラーとなります。
@@ -43,26 +43,42 @@ score: スコアの単位を指します。scoreは以下のプロパティを�
       clef (singleの場合partやinstrumentから自動設定、grandの場合自動的に[Treble, Bass]、clef型、要素の数をtypeやstaff_countに一致): 音部記号。staffが複数の場合、[Treble, Bass]のように表します。要素の数がstaffやtypeと合わない場合、エラーとなります。
       lines (1~20, デフォルトでは全ての要素が5): 一線譜から五線譜、そしてそれ以上を設定できます。10以上は見ずらいので推奨されません。staffが複数の場合、[5, 5]のように表します。要素の数がstaffやtypeと合わない場合、エラーとなります。
       chromatic_assignment (bool, デフォルトはfalseだが、percussionの場合のみデフォルトでtrue): trueの場合、全音階ベースではなく、半音階ベースで位置を割り当てます。特に打楽器において有効です。
-    dynamics: dynamicsは以下のプロパティを持ちます: measure, position, level, change, text
+    dynamics: dynamicsは以下のプロパティを持ちます: measure, position, level, change, change_mode, text
       measure (必須, i32, 1以上): dynamicsを変更する小節番号です。transpositionがmeasure: 1における値を持たない場合とVecScoreに記された範囲外の値を指定した場合、エラーとなります。
       position (必須, f32, 1.0~999.999...): dynamicsを変更する位置です。何かしらのScoreElementの位置（分数で表現）と完全に一致しない場合、一番近いScoreElementの位置に設定されます。何かしらのScoreElementの位置（分数で表現）と十分に近い値でない場合、警告が出ます。また、VecScoreの当該measureにおける範囲外の場合、エラーとなります。
       level (文字列、一致する場合DynamicsLevel型): 変化するダイナミクスです。
       change (文字列、一致する場合DynamicChange型): 同じ位置の場合はlevelの後ろにつきます。後で実装 (pocoとかめんどくさい)
+      change_mode (changeが値を持つ場合必須, letterかsymbol): DynamicChangeがCrescendo, Diminuendo, Cresc, Dim, Decrescendoの場合、symbolが有効。symbolにも関わらずこれらでない場合、エラー。
+      change_end (change_modeがsymbolの場合必須) change_endは以下のプロパティを持ちます。
+        measure (必須, i32, 1以上): 記号の終端となる位置の小節番号です。値が上位のdynamics未満の場合とVecScoreに記された範囲外の値を指定した場合、エラーとなります。
+        position (必須, f32, 1.0~999.999...): 記号の終端となる位置です。何かしらのScoreElementの位置（分数で表現）と完全に一致しない場合、一番近いScoreElementの位置に設定されます。何かしらのScoreElementの位置（分数で表現）と十分に近い値でない場合、警告が出ます。また、change_endのmeasureがdynamicsのmeasureと同じかつchange_endのpositionがdynamicsのposition以下の場合と、VecScoreの当該measureにおける範囲外の場合、エラーとなります。
       text (文字列): 補足テキスト、同じ位置の場合はlevelやchangeの後ろにくっつきます。(subitoとか前にくっつくやつは後で実装)
-    accidentals: リアルタイム、自動で全ての音を生成しておく IDとの紐づけ忘れずに
-
-    articulations: リアルタイム、自動で全ての音を生成しておく IDとの紐づけ忘れずに
-
-
-
-  accidentals ダブルフラットとか忘れない、既にあるC#5とかの表記は活用, articulationsは短縮形にも対応させる
-
-  スラーは開始位置のIDと終了位置のID
+    notes: VecScore、outputのVecScore(一時ファイル、名前を考える)の変更をリアルタイムで監視します。初回読み込み時、全てのNote、Chordの構成音、Tieについて、対応するIDと、デフォルト値のaccidentals, articulationsを生成します。notesは以下のプロパティを持ちます: measure, id, attributes
+      measure (必須, i32, 1以上): noteを特定するための小節番号です。VecScoreに記された範囲外の値を指定した場合、エラーとなります。
+      id (必須, i32, 1以上): vscパーサにより自動生成されたidです。出力結果に含まれないidを指定した場合、エラーとなります。chordの構成音のidはarticulationが必ずnoneになり、それ以外の場合はエラーになります。chordにおける実際のアーティキュレーションは、chord自体のidのものが適用されます。
+      attributes (必須): note, chord, tieの持つ属性です。attributesは以下のプロパティを持ちます: scale_division, accidental, articulations, slur
+        scale_division (ScaleDivision型, デフォルトは12): (範囲指定コマンドで一括変更可能にする。)ScaleDivision型以外の入力があった場合はエラーとなります。
+        accidental (必須, Accidental型) :音名による入力の場合、accidentalはそこから自動決定されます。MIDI note numberの場合、別のロジックにより自動で決定されます。臨時記号の内容と音高が一致しない場合エラーとなります。(あとで実装: scale_divisionに基づき、pitch_centsから最も近い値が設定されます。)
+        articulations (必須, Articulation型 例: [staccato, tenuto]): 重複可能なオプションあり。重複不可能な場合(同一のもの、noneを含む場合など)はエラーとなります。
+        notehead (bool, デフォルトはtrue): falseの場合、譜頭を省略します。
+        slur (bool, デフォルトはfalse): trueだった場合、スラーを配置します。slurがtrueの音が始点となります。
+        slur_end_measure (slurがtrueのとき必須, i32, 1以上): スラーの終端の音符が含まれるmeasureです。始点より小さい値であった場合、エラーとなります。
+        slur_end_id (slurがtrueのとき必須, i32, 1以上): スラーの終端のidです。chordの場合は、chordのidを指定します。始点より前の音だった場合、エラーとなります。
+        trill (bool)
+        pitch_slide: ピッチを滑らかに変化させます。記入がない場合は追加されません。pitch_slideは以下のプロパティを持ちます: type, 
+          text (bool, デフォルトはtrue): 線の隣に文字を追加するか決定します。
+          type (GlissandoかPortamento, デフォルトはglissando): textがtrueの場合、どちらかから選択します。textがfalseの場合に設定するとエラーとなります。
+          connection (bool, デフォルトはtrue): 線の先に音符が配置されているか決めます。trueの場合、その音の譜頭とslide_end_idで設定された譜頭の間に線が繋がれます。その間がnoteあるいは始点のchordと同数の構成音によるchordで埋まっている場合、譜頭は省略され、結ばれた2つの譜頭のみが残ります。falseかつslide_end_measureおおよび
+          slide_end_measure (slide_end_idまたはslide_end_pitchを持つ場合必須, i32, 1以上): 結ばれる終点の譜頭を持つ音符のあるmeasureを示します。
+          slide_end_id (slide_end_measureを持つ場合、slide_end_positionとどちらか必須、i32, 1以上): 結ばれる終点の譜頭を持つ音符のidを示します。noteからchord, chordからnote、構成音数の異なるchord間、restとの間は結ぶことができず、エラーになります。また、slide_end_positionと同時に設定した場合、エラーとなります。
+          slide_end_position (slide_end_measureを持つ場合、slide_end_idとどちらか必須, f32, 1.0~999.999...): idで指定できない、例えば音符に向かわないなどの場合は、postionにより指定します。slide_end_idと同時に設定した場合、エラーとなります。
+          slide_end_note (slide_end_positionを指定した場合必須, midi_note_numberまたはnote_name): どの高さに線の終端を向かわせるかを決定します。slide_end_idと同時に設定した場合、slide_end_noteが優先されます。
+          
   歌詞はtrueの場合、歌詞ファイルを参照 (後で実装)
 
 ```rs
 
-enum Tempo_mark{
+enum TempoMark{
   Grave,      Largo,
   Larghetto,  Lento,
   Adagio,     Andante,
@@ -130,34 +146,51 @@ enum Clef {
 
 
 enum DynamicsLevel{
-    PPP,
-    PP,
-    P,
-    MP,
-    MF,
-    F,
-    FF,
-    FFF,
-    SF,
-    SFZ,
-    SFFZ,
-    RFZ,
-    SFP,
-    SFPP,
-    SFMP,
-    FP,
-    FPP,
-    FMP,
-    MFP,
-    MFPP,
-    MFMP,
-    FFP,
-    FFPP,
-    FFMP,
+  PPP,
+  PP,
+  P,
+  MP,
+  MF,
+  F,
+  FF,
+  FFF,
+  SF,
+  SFZ,
+  SFFZ,
+  RFZ,
+  SFP,
+  SFPP,
+  SFMP,
+  FP,
+  FPP,
+  FMP,
+  MFP,
+  MFPP,
+  MFMP,
+  FFP,
+  FFPP,
+  FFMP,
 }
 
 enum DynamicsChange{
 
+}
+
+enum Accidental{
+  // 通常臨時記号
+  None,         Natural,
+  Sharp,        Flat,
+  DoubleSharp,  DoubleFlat,
+  NaturalSharp, NaturalFlat,
+  // 四分音
+  QuarterSharp,      QuarterFlat,       // 1/4
+  ThreeQuarterSharp, ThreeQuarterFlat,  // 3/4
+  // 六分音以降は今度実装
+}
+
+enum Articulation {
+  None,
+  Staccato, Tenuto, Accent, Marcato, Fermata, BowUp, BowDown,
 }
 
 ```
