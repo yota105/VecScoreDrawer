@@ -3,9 +3,18 @@
 
 use std::str::FromStr;
 
-/// Score represents the entire musical score and holds multiple measures.
+/**
+ * Score represents the entire musical score and holds multiple parts (each part = instrument).
+ */
 #[derive(Debug, Clone)]
 pub struct Score {
+    pub parts: Vec<Part>,
+}
+
+/// Part represents a single instrument part, holding its name and measures.
+#[derive(Debug, Clone)]
+pub struct Part {
+    pub name: String,
     pub measures: Vec<Measure>,
 }
 

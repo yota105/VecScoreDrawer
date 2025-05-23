@@ -47,7 +47,7 @@ fn main() {
                     if let Err(e) = std::fs::write(output_path, &formatted) {
                         eprintln!("Error writing to file {}: {}", output_path, e);
                     } else {
-                        println!("書き出しました: {}", output_path);
+                        println!("Write file: {}", output_path);
                     }
                 },
                 Err(errs) => {

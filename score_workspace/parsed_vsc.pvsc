@@ -1,505 +1,1072 @@
 Parsed Score:
 Score {
-    measures: [
-        Measure {
-            number: 1,
-            meter: (
-                4,
-                4,
-            ),
-            duration: 4.0,
-            unit_duration: 1.0,
-            beats: [
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    1,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    NoteName {
-                                        letter: C,
-                                        accidental: None,
-                                        octave: 5,
+    parts: [
+        Part {
+            name: "Piano1",
+            measures: [
+                Measure {
+                    number: 1,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            NoteName {
+                                                letter: C,
+                                                accidental: None,
+                                                octave: 5,
+                                            },
+                                        ),
+                                        pitch_cents: Some(
+                                            7200,
+                                        ),
+                                        tie: true,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
                                     },
                                 ),
-                                pitch_cents: Some(
-                                    7200,
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Tie(
+                                    Tie {
+                                        id: Some(
+                                            2,
+                                        ),
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
                                 ),
-                                tie: true,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Tie(
-                            Tie {
-                                id: Some(
-                                    2,
-                                ),
-                                pitch: None,
-                                pitch_cents: None,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    3,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        76,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    7600,
-                                ),
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    4,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        79,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    7900,
-                                ),
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-            ],
-        },
-        Measure {
-            number: 2,
-            meter: (
-                4,
-                4,
-            ),
-            duration: 4.0,
-            unit_duration: 1.0,
-            beats: [
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    1,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        71,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    7100,
-                                ),
-                                tie: true,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Subdivision(
-                            Subdivision {
-                                base_division: 2,
-                                elements: [
-                                    Tie(
-                                        Tie {
-                                            id: Some(
-                                                2,
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            3,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                76,
                                             ),
-                                            pitch: None,
-                                            pitch_cents: None,
-                                            duration: Ratio {
-                                                numer: 1,
-                                                denom: 2,
+                                        ),
+                                        pitch_cents: Some(
+                                            7600,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            4,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 2,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                71,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7100,
+                                        ),
+                                        tie: true,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Subdivision(
+                                    Subdivision {
+                                        base_division: 2,
+                                        elements: [
+                                            Tie(
+                                                Tie {
+                                                    id: Some(
+                                                        2,
+                                                    ),
+                                                    pitch: None,
+                                                    pitch_cents: None,
+                                                    duration: Ratio {
+                                                        numer: 1,
+                                                        denom: 2,
+                                                    },
+                                                },
+                                            ),
+                                            Subdivision(
+                                                Subdivision {
+                                                    base_division: 2,
+                                                    elements: [
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    3,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        72,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7200,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    4,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        74,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7400,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            5,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                72,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7200,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            6,
+                                        ),
+                                        event_type: Rest,
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 3,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                81,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            8100,
+                                        ),
+                                        tie: true,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Tie(
+                                    Tie {
+                                        id: Some(
+                                            2,
+                                        ),
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            3,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            4,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                84,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            8400,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 4,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Subdivision(
+                                    Subdivision {
+                                        base_division: 2,
+                                        elements: [
+                                            Event(
+                                                Event {
+                                                    id: Some(
+                                                        2,
+                                                    ),
+                                                    event_type: Note,
+                                                    pitch: Some(
+                                                        Midi(
+                                                            77,
+                                                        ),
+                                                    ),
+                                                    pitch_cents: Some(
+                                                        7700,
+                                                    ),
+                                                    tie: false,
+                                                    duration: Ratio {
+                                                        numer: 1,
+                                                        denom: 2,
+                                                    },
+                                                },
+                                            ),
+                                            Subdivision(
+                                                Subdivision {
+                                                    base_division: 2,
+                                                    elements: [
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    3,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        76,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7600,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    4,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        77,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7700,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Chord(
+                                    Chord {
+                                        id: Some(
+                                            7,
+                                        ),
+                                        events: [
+                                            Event {
+                                                id: Some(
+                                                    5,
+                                                ),
+                                                event_type: Note,
+                                                pitch: Some(
+                                                    Midi(
+                                                        76,
+                                                    ),
+                                                ),
+                                                pitch_cents: Some(
+                                                    7600,
+                                                ),
+                                                tie: false,
+                                                duration: Ratio {
+                                                    numer: 1,
+                                                    denom: 1,
+                                                },
                                             },
-                                        },
-                                    ),
-                                    Subdivision(
-                                        Subdivision {
-                                            base_division: 2,
-                                            elements: [
-                                                Event(
-                                                    Event {
-                                                        id: Some(
-                                                            3,
-                                                        ),
-                                                        event_type: Note,
-                                                        pitch: Some(
-                                                            Midi(
-                                                                72,
-                                                            ),
-                                                        ),
-                                                        pitch_cents: Some(
-                                                            7200,
-                                                        ),
-                                                        tie: false,
-                                                        duration: Ratio {
-                                                            numer: 1,
-                                                            denom: 4,
-                                                        },
+                                            Event {
+                                                id: Some(
+                                                    6,
+                                                ),
+                                                event_type: Note,
+                                                pitch: Some(
+                                                    NoteName {
+                                                        letter: C,
+                                                        accidental: None,
+                                                        octave: 5,
                                                     },
                                                 ),
-                                                Event(
-                                                    Event {
-                                                        id: Some(
-                                                            4,
-                                                        ),
-                                                        event_type: Note,
-                                                        pitch: Some(
-                                                            Midi(
-                                                                74,
-                                                            ),
-                                                        ),
-                                                        pitch_cents: Some(
-                                                            7400,
-                                                        ),
-                                                        tie: false,
-                                                        duration: Ratio {
-                                                            numer: 1,
-                                                            denom: 4,
-                                                        },
-                                                    },
+                                                pitch_cents: Some(
+                                                    7200,
                                                 ),
-                                            ],
-                                        },
-                                    ),
-                                ],
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    5,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        72,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    7200,
-                                ),
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    6,
-                                ),
-                                event_type: Rest,
-                                pitch: None,
-                                pitch_cents: None,
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-            ],
-        },
-        Measure {
-            number: 3,
-            meter: (
-                4,
-                4,
-            ),
-            duration: 4.0,
-            unit_duration: 1.0,
-            beats: [
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    1,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        81,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    8100,
-                                ),
-                                tie: true,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Tie(
-                            Tie {
-                                id: Some(
-                                    2,
-                                ),
-                                pitch: None,
-                                pitch_cents: None,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    3,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        79,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    7900,
-                                ),
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    4,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        84,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    8400,
-                                ),
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-            ],
-        },
-        Measure {
-            number: 4,
-            meter: (
-                4,
-                4,
-            ),
-            duration: 4.0,
-            unit_duration: 1.0,
-            beats: [
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    1,
-                                ),
-                                event_type: Note,
-                                pitch: Some(
-                                    Midi(
-                                        79,
-                                    ),
-                                ),
-                                pitch_cents: Some(
-                                    7900,
-                                ),
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Subdivision(
-                            Subdivision {
-                                base_division: 2,
-                                elements: [
-                                    Event(
-                                        Event {
-                                            id: Some(
-                                                2,
-                                            ),
-                                            event_type: Note,
-                                            pitch: Some(
-                                                Midi(
-                                                    77,
-                                                ),
-                                            ),
-                                            pitch_cents: Some(
-                                                7700,
-                                            ),
-                                            tie: false,
-                                            duration: Ratio {
-                                                numer: 1,
-                                                denom: 2,
+                                                tie: false,
+                                                duration: Ratio {
+                                                    numer: 1,
+                                                    denom: 1,
+                                                },
                                             },
+                                        ],
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            8,
+                                        ),
+                                        event_type: Rest,
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
                                         },
-                                    ),
-                                    Subdivision(
-                                        Subdivision {
-                                            base_division: 2,
-                                            elements: [
-                                                Event(
-                                                    Event {
-                                                        id: Some(
-                                                            3,
-                                                        ),
-                                                        event_type: Note,
-                                                        pitch: Some(
-                                                            Midi(
-                                                                76,
-                                                            ),
-                                                        ),
-                                                        pitch_cents: Some(
-                                                            7600,
-                                                        ),
-                                                        tie: false,
-                                                        duration: Ratio {
-                                                            numer: 1,
-                                                            denom: 4,
-                                                        },
-                                                    },
-                                                ),
-                                                Event(
-                                                    Event {
-                                                        id: Some(
-                                                            4,
-                                                        ),
-                                                        event_type: Note,
-                                                        pitch: Some(
-                                                            Midi(
-                                                                77,
-                                                            ),
-                                                        ),
-                                                        pitch_cents: Some(
-                                                            7700,
-                                                        ),
-                                                        tie: false,
-                                                        duration: Ratio {
-                                                            numer: 1,
-                                                            denom: 4,
-                                                        },
-                                                    },
-                                                ),
-                                            ],
-                                        },
-                                    ),
-                                ],
-                            },
-                        ),
+                                    },
+                                ),
+                            ],
+                        },
                     ],
                 },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Chord(
-                            Chord {
-                                id: Some(
-                                    7,
+            ],
+        },
+        Part {
+            name: "Piano2",
+            measures: [
+                Measure {
+                    number: 1,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                72,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7200,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
                                 ),
-                                events: [
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Tie(
+                                    Tie {
+                                        id: Some(
+                                            2,
+                                        ),
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            3,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                76,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7600,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            4,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 2,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                71,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7100,
+                                        ),
+                                        tie: true,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Subdivision(
+                                    Subdivision {
+                                        base_division: 2,
+                                        elements: [
+                                            Tie(
+                                                Tie {
+                                                    id: Some(
+                                                        2,
+                                                    ),
+                                                    pitch: None,
+                                                    pitch_cents: None,
+                                                    duration: Ratio {
+                                                        numer: 1,
+                                                        denom: 2,
+                                                    },
+                                                },
+                                            ),
+                                            Subdivision(
+                                                Subdivision {
+                                                    base_division: 2,
+                                                    elements: [
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    3,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        72,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7200,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    4,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        74,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7400,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            5,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                72,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7200,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            6,
+                                        ),
+                                        event_type: Rest,
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 3,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                81,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            8100,
+                                        ),
+                                        tie: true,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Tie(
+                                    Tie {
+                                        id: Some(
+                                            2,
+                                        ),
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            3,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            4,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                84,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            8400,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 4,
+                    meter: (
+                        4,
+                        4,
+                    ),
+                    duration: 4.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            1,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                79,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7900,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Subdivision(
+                                    Subdivision {
+                                        base_division: 2,
+                                        elements: [
+                                            Event(
+                                                Event {
+                                                    id: Some(
+                                                        2,
+                                                    ),
+                                                    event_type: Note,
+                                                    pitch: Some(
+                                                        Midi(
+                                                            77,
+                                                        ),
+                                                    ),
+                                                    pitch_cents: Some(
+                                                        7700,
+                                                    ),
+                                                    tie: false,
+                                                    duration: Ratio {
+                                                        numer: 1,
+                                                        denom: 2,
+                                                    },
+                                                },
+                                            ),
+                                            Subdivision(
+                                                Subdivision {
+                                                    base_division: 2,
+                                                    elements: [
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    3,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        76,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7600,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                        Event(
+                                                            Event {
+                                                                id: Some(
+                                                                    4,
+                                                                ),
+                                                                event_type: Note,
+                                                                pitch: Some(
+                                                                    Midi(
+                                                                        77,
+                                                                    ),
+                                                                ),
+                                                                pitch_cents: Some(
+                                                                    7700,
+                                                                ),
+                                                                tie: false,
+                                                                duration: Ratio {
+                                                                    numer: 1,
+                                                                    denom: 4,
+                                                                },
+                                                            },
+                                                        ),
+                                                    ],
+                                                },
+                                            ),
+                                        ],
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
                                     Event {
                                         id: Some(
                                             5,
@@ -519,50 +1086,29 @@ Score {
                                             denom: 1,
                                         },
                                     },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
                                     Event {
                                         id: Some(
                                             6,
                                         ),
-                                        event_type: Note,
-                                        pitch: Some(
-                                            NoteName {
-                                                letter: C,
-                                                accidental: None,
-                                                octave: 5,
-                                            },
-                                        ),
-                                        pitch_cents: Some(
-                                            7200,
-                                        ),
+                                        event_type: Rest,
+                                        pitch: None,
+                                        pitch_cents: None,
                                         tie: false,
                                         duration: Ratio {
                                             numer: 1,
                                             denom: 1,
                                         },
                                     },
-                                ],
-                            },
-                        ),
-                    ],
-                },
-                Beat {
-                    duration: 1.0,
-                    elements: [
-                        Event(
-                            Event {
-                                id: Some(
-                                    8,
                                 ),
-                                event_type: Rest,
-                                pitch: None,
-                                pitch_cents: None,
-                                tie: false,
-                                duration: Ratio {
-                                    numer: 1,
-                                    denom: 1,
-                                },
-                            },
-                        ),
+                            ],
+                        },
                     ],
                 },
             ],

@@ -256,13 +256,33 @@ fn remove_comments_multiline(input: &str) -> String {
 /// 複数エラーをVec<ParseError>で返す
 pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
     let cleaned_input = remove_comments_multiline(input);
-    let mut measures = Vec::new();
+    let mut parts = Vec::new();
+    let mut current_part_name: Option<String> = None;
+    let mut current_measures = Vec::new();
     let mut current_meter: Option<(usize, usize)> = None;
     let mut errors = Vec::new();
 
     for (line_idx, line_content) in cleaned_input.lines().enumerate() {
         let line = line_content.trim();
         if line.is_empty() {
+            continue;
+        }
+        // Part header detection
+        if line.starts_with("#[Part(") && line.ends_with(")]") {
+            // If there is a previous part, push it
+            if let Some(name) = current_part_name.take() {
+                if !current_measures.is_empty() {
+                    parts.push(crate::data::Part {
+                        name,
+                        measures: current_measures.clone(),
+                    });
+                    current_measures.clear();
+                }
+            }
+            // Extract part name
+            let name = line.trim_start_matches("#[Part(").trim_end_matches(")]").to_string();
+            current_part_name = Some(name);
+            current_meter = None;
             continue;
         }
 
@@ -315,13 +335,13 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
             (None, line_after_measure_no)
         };
 
-        if current_meter.is_none() && meter.is_none() && measures.is_empty() {
+        if current_meter.is_none() && meter.is_none() && current_measures.is_empty() {
             errors.push(ParseError {
                 message: format!("No meter specified in the first measure (Measure {})", measure_no),
                 line: Some(line_idx),
             });
             continue;
-        } else if current_meter.is_none() && meter.is_none() && !measures.is_empty() {
+        } else if current_meter.is_none() && meter.is_none() && !current_measures.is_empty() {
             // 何もしない
         } else if let Some(m) = meter {
             current_meter = Some(m);
@@ -422,7 +442,7 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
 
         // beatsが空でもmeasures.pushはしない（ただし他のエラーは収集）
         if !beats.is_empty() {
-            measures.push(Measure {
+            current_measures.push(Measure {
                 number: measure_no,
                 beats,
                 duration: 0.0,
@@ -431,8 +451,17 @@ pub fn parse_score(input: &str) -> Result<Score, Vec<ParseError>> {
             });
         }
     }
+    // 最後のpartを追加
+    if let Some(name) = current_part_name {
+        if !current_measures.is_empty() {
+            parts.push(crate::data::Part {
+                name,
+                measures: current_measures,
+            });
+        }
+    }
     if errors.is_empty() {
-        Ok(Score { measures })
+        Ok(Score { parts })
     } else {
         Err(errors)
     }

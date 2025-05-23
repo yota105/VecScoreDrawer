@@ -2,6 +2,10 @@
   "scopeName": "source.vsc",
   "patterns": [
     {
+      "name": "entity.name.section.part.vsc",
+      "match": "^#\\[Part\\([^)]+\\)\\]"
+    },
+    {
       "name": "entity.name.section.measure.vsc",
       "match": "^(\\d+):"
     },
