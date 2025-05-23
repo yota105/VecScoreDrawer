@@ -3,7 +3,13 @@
 楽譜（意味層）のデータ型・パーサ・レイアウト情報を管理します。
 - model.rs: 楽譜のデータ型
 - parser.rs: 楽譜定義ファイルのパーサ
-- layout.rs: レイアウト情報
+
+仮表示まで可能にします。(htmlみたいなもの)
+
+全体の行数が非常に長くなるため、
+・全体の定義
+・楽器ごとに10小節ごと
+に分割します。
 
 ## スコア定義オプションのリスト
 
@@ -190,51 +196,127 @@ enum Accidental{
 
 enum Articulation {
   None,
-  Staccato, Tenuto, Accent, Marcato, Fermata, BowUp, BowDown,
+  Staccato, Tenuto, Accent, Marcato, Fermata, BowUp, BowDown, Trill,
 }
 
 ```
 
 ## レイアウト定義ファイル例
 
-`layout_example.yaml` は、YAML形式で楽譜のレイアウトや内容を定義するサンプルです。  
+`sample_score_dif.yaml` は、YAML形式で楽譜のレイアウトや内容を定義するサンプルです。  
 テンポ変更、パート構成、譜表の種類、音符の臨時記号やアーティキュレーションなどを柔軟に記述できます。
+sample.vscに対応します。
 
 ```yaml
 score:
   tempo:
     - measure: 1
-      position: 0.0
+      position: 1.0
       bpm: 120
-    - measure: 6
-      position: 1.25
-      bpm: 144
+
+  key_signature: 
+    - measure: 1
+      position: 1
+      key: "C_Major"
+
   parts:
-    - name: "Percussion"
-      dynamics:
-        - measure: 1
-          level: "mf"
+    - name: "Piano"
       staves:
         - measure: 1
-          type: "grand"
-          lines: 5 #未設定の場合は5
-          clef: ["treble", "bass"]
-        - measure: 10
-          type: "single"
-          clef: "percussion"
-        - measure: 10
-          staff_count: 3
-          lines: [5, 1, 5]
+          position: 1
+          type: "grand" #またはstaff_count: 2, clef: ["treble", "bass"]
+          lines: [5, 5] #未設定でも同様
 
+      dynamics:
+        - measure: 1
+          position: 1
+          level: "P"  #"p"でも可能にする
 
+      notes: #以下は絶対自動生成できるようにする、特にタイを自動でまとめるロジック　小節ごとに分けると分かりやすい
 
+        #------------<Measure 1>------------#
+        - measure: 1
+          id: 1
+          attributes: 
+            - accidental: "None"
+              slur: "true"
+              slur_end_measure: 1
+              slur_end_id: 3
+        - measure: 1
+          id: 3
+          attributes:
+            - accidental: "None"
+        - measure: 1
+          id: 4
+          attributes:
+            - accidental: "None"
 
-      notes:
-        - pitch: "C4"
-          accidental: "sharp"
-          articulation: "accent"
-        - pitch: "D4"
-          accidental: "natural"
-          articulation: "tenuto"
+        #------------<Measure 2>------------#
+        - measure: 2
+          id: 1
+          attributes: 
+            - accidental: "None"
+              slur: "true"
+              slur_end_measure: 2
+              slur_end_id: 5
+        - measure: 2
+          id: 2
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 3
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 4
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 5
+          attributes: 
+            - accidental: "None"
+
+        #------------<Measure 3>------------#
+        - measure: 1
+          id: 1
+          attributes: 
+            - accidental: "None"
+              slur: "true"
+              slur_end_measure: 3
+              slur_end_id: 3
+        - measure: 1
+          id: 3
+          attributes:
+            - accidental: "None"
+        - measure: 1
+          id: 4
+          attributes:
+            - accidental: "None"
+
+        #------------<Measure 4>------------#
+        - measure: 2
+          id: 1
+          attributes: 
+            - accidental: "None"
+              slur: "true"
+              slur_end_measure: 4
+              slur_end_id: 5
+        - measure: 2
+          id: 2
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 3
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 4
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 5
+          attributes: 
+            - accidental: "None"
+
 ```
 
