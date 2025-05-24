@@ -1,19 +1,28 @@
 // CLIコマンド定義
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, Args as ClapArgs};
 
 #[derive(Parser)]
-#[command(name = "VecScoreDrawer")]
-pub struct Cli {
+#[command(author, version, about, long_about = None)]
+pub struct Args {
     #[command(subcommand)]
-    pub command: Commands,
+    pub subcommand: SubCommand,
 }
 
 #[derive(Subcommand)]
-pub enum Commands {
-    /// Print the score to standard output or file
-    Print {
+pub enum SubCommand {
+    Generate {
+        #[arg(long)]
         input: String,
+        #[arg(long)]
+        output: String,
     },
-    /// sample.vsc→score_workspace/score_def/score_def.yamlを生成
-    GenerateScore,
+    /// 楽譜をSVGでレンダリングする
+    Render(RenderArgs),
+}
+
+#[derive(ClapArgs)]
+pub struct RenderArgs {
+    /// 出力SVGファイル名
+    #[arg(long)]
+    pub output: String,
 }
