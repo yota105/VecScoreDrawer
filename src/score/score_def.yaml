@@ -1,0 +1,97 @@
+score:
+  tempo:
+    - measure: 1
+      position: 1.0
+      bpm: 120
+
+  key_signature: 
+    - measure: 1
+      position: 1
+      key: "C_Major"
+
+  parts:
+    - name: "Piano"
+      staves:
+        - measure: 1
+          position: 1
+          type: "single" #またはstaff_count: 2, clef: ["treble", "bass"]
+          lines: 5 #未設定でも同様
+
+      dynamics:
+        - measure: 1
+          position: 1
+          level: "P"  #"p"でも可能にする
+
+      notes: #以下は絶対自動生成できるようにする、特にタイを自動でまとめるロジック　小節ごとに分けると分かりやすい
+
+        #------------<Measure 1>------------#
+        - measure: 1
+          id: 1
+          attributes: 
+            - accidental: "None"
+        - measure: 1
+          id: 3
+          attributes:
+            - accidental: "None"
+        - measure: 1
+          id: 4
+          attributes:
+            - accidental: "None"
+
+        #------------<Measure 2>------------#
+        - measure: 2
+          id: 1
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 2
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 3
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 4
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 5
+          attributes: 
+            - accidental: "None"
+
+        #------------<Measure 3>------------#
+        - measure: 1
+          id: 1
+          attributes: 
+            - accidental: "None"
+        - measure: 1
+          id: 3
+          attributes:
+            - accidental: "None"
+        - measure: 1
+          id: 4
+          attributes:
+            - accidental: "None"
+
+        #------------<Measure 4>------------#
+        - measure: 2
+          id: 1
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 2
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 3
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 4
+          attributes: 
+            - accidental: "None"
+        - measure: 2
+          id: 5
+          attributes: 
+            - accidental: "None"
