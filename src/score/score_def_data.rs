@@ -55,9 +55,12 @@ pub struct NoteEntry {
     pub measure: usize,
     pub id: usize,
     pub attributes: Vec<NoteAttributes>,
+    pub source_ids: Option<Vec<usize>>, // 和音の構成音idリスト等
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct NoteAttributes {
-    pub accidental: String,
+    pub r#type: String,      // "note" or "rest"
+    pub accidental: String,  // "None" for rest
+    pub duration: String,    // 例: "2/1"
 }

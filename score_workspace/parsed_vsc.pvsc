@@ -497,34 +497,72 @@ Score {
                         Beat {
                             duration: 1.0,
                             elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            5,
+                                        ),
+                                        event_type: Note,
+                                        pitch: Some(
+                                            Midi(
+                                                75,
+                                            ),
+                                        ),
+                                        pitch_cents: Some(
+                                            7500,
+                                        ),
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
+                                Event(
+                                    Event {
+                                        id: Some(
+                                            6,
+                                        ),
+                                        event_type: Rest,
+                                        pitch: None,
+                                        pitch_cents: None,
+                                        tie: false,
+                                        duration: Ratio {
+                                            numer: 1,
+                                            denom: 1,
+                                        },
+                                    },
+                                ),
+                            ],
+                        },
+                    ],
+                },
+                Measure {
+                    number: 5,
+                    meter: (
+                        3,
+                        4,
+                    ),
+                    duration: 3.0,
+                    unit_duration: 1.0,
+                    beats: [
+                        Beat {
+                            duration: 1.0,
+                            elements: [
                                 Chord(
                                     Chord {
                                         id: Some(
-                                            7,
+                                            4,
                                         ),
                                         events: [
                                             Event {
                                                 id: Some(
-                                                    5,
-                                                ),
-                                                event_type: Note,
-                                                pitch: Some(
-                                                    Midi(
-                                                        76,
-                                                    ),
-                                                ),
-                                                pitch_cents: Some(
-                                                    7600,
-                                                ),
-                                                tie: false,
-                                                duration: Ratio {
-                                                    numer: 1,
-                                                    denom: 1,
-                                                },
-                                            },
-                                            Event {
-                                                id: Some(
-                                                    6,
+                                                    1,
                                                 ),
                                                 event_type: Note,
                                                 pitch: Some(
@@ -537,7 +575,49 @@ Score {
                                                 pitch_cents: Some(
                                                     7200,
                                                 ),
-                                                tie: false,
+                                                tie: true,
+                                                duration: Ratio {
+                                                    numer: 1,
+                                                    denom: 1,
+                                                },
+                                            },
+                                            Event {
+                                                id: Some(
+                                                    2,
+                                                ),
+                                                event_type: Note,
+                                                pitch: Some(
+                                                    NoteName {
+                                                        letter: E,
+                                                        accidental: None,
+                                                        octave: 5,
+                                                    },
+                                                ),
+                                                pitch_cents: Some(
+                                                    7600,
+                                                ),
+                                                tie: true,
+                                                duration: Ratio {
+                                                    numer: 1,
+                                                    denom: 1,
+                                                },
+                                            },
+                                            Event {
+                                                id: Some(
+                                                    3,
+                                                ),
+                                                event_type: Note,
+                                                pitch: Some(
+                                                    NoteName {
+                                                        letter: G,
+                                                        accidental: None,
+                                                        octave: 5,
+                                                    },
+                                                ),
+                                                pitch_cents: Some(
+                                                    7900,
+                                                ),
+                                                tie: true,
                                                 duration: Ratio {
                                                     numer: 1,
                                                     denom: 1,
@@ -551,10 +631,50 @@ Score {
                         Beat {
                             duration: 1.0,
                             elements: [
+                                Subdivision(
+                                    Subdivision {
+                                        base_division: 2,
+                                        elements: [
+                                            Tie(
+                                                Tie {
+                                                    id: Some(
+                                                        5,
+                                                    ),
+                                                    pitch: None,
+                                                    pitch_cents: None,
+                                                    duration: Ratio {
+                                                        numer: 1,
+                                                        denom: 2,
+                                                    },
+                                                },
+                                            ),
+                                            Event(
+                                                Event {
+                                                    id: Some(
+                                                        6,
+                                                    ),
+                                                    event_type: Rest,
+                                                    pitch: None,
+                                                    pitch_cents: None,
+                                                    tie: false,
+                                                    duration: Ratio {
+                                                        numer: 1,
+                                                        denom: 2,
+                                                    },
+                                                },
+                                            ),
+                                        ],
+                                    },
+                                ),
+                            ],
+                        },
+                        Beat {
+                            duration: 1.0,
+                            elements: [
                                 Event(
                                     Event {
                                         id: Some(
-                                            8,
+                                            7,
                                         ),
                                         event_type: Rest,
                                         pitch: None,

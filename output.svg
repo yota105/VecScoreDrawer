@@ -5,8 +5,8 @@
 <line stroke="black" stroke-width="2" x1="50" x2="550" y1="64" y2="64"/>
 <line stroke="black" stroke-width="2" x1="50" x2="550" y1="76" y2="76"/>
 <line stroke="black" stroke-width="2" x1="50" x2="550" y1="88" y2="88"/>
-<circle cx="175" cy="64" fill="black" r="7"/>
-<circle cx="300" cy="64" fill="black" r="7"/>
-<circle cx="425" cy="64" fill="black" r="7"/>
+<circle cx="175" cy="64" fill="black" r="7" stroke="black"/>
+<circle cx="300" cy="64" fill="black" r="7" stroke="black"/>
+<circle cx="425" cy="64" fill="black" r="7" stroke="black"/>
 </g>
 </svg>

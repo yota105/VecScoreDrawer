@@ -18,6 +18,8 @@ pub enum SubCommand {
     },
     /// 楽譜をSVGでレンダリングする
     Render(RenderArgs),
+    /// score_def.yamlを生成する（従来のgenerate-scoreコマンド）
+    GenerateScore,
 }
 
 #[derive(ClapArgs)]

@@ -47,14 +47,63 @@ fn main() {
                 }
             }
         }
+        SubCommand::GenerateScore => {
+            let vsc_input = "sample.vsc";
+            let yaml_output = "score_workspace/score_def/score_def.yaml";
+            let pvsc_output = "score_workspace/parsed_vsc.pvsc";
+            let input = match std::fs::read_to_string(std::path::Path::new(vsc_input)) {
+                Ok(content) => content,
+                Err(e) => {
+                    eprintln!("Error reading file {}: {}", vsc_input, e);
+                    return;
+                }
+            };
+            match parse_score(&input) {
+                Ok(score) => {
+                    let processed_score = process_score(score);
+
+                    // pvsc出力
+                    let formatted = format!("Parsed Score:\n{:#?}", processed_score);
+                    if let Some(parent) = std::path::Path::new(pvsc_output).parent() {
+                        std::fs::create_dir_all(parent).ok();
+                    }
+                    if let Err(e) = std::fs::write(pvsc_output, &formatted) {
+                        eprintln!("Error writing to file {}: {}", pvsc_output, e);
+                    } else {
+                        println!("Write file: {}", pvsc_output);
+                    }
+
+                    // score_def.yaml出力
+                    match generate_score_def_yaml_from_score(&processed_score) {
+                        Ok(yaml) => {
+                            if let Some(parent) = std::path::Path::new(yaml_output).parent() {
+                                std::fs::create_dir_all(parent).ok();
+                            }
+                            if let Err(e) = std::fs::write(yaml_output, &yaml) {
+                                eprintln!("Error writing to file {}: {}", yaml_output, e);
+                            } else {
+                                println!("Generated score_def.yaml: {}", yaml_output);
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error generating score_def.yaml: {}", e);
+                        }
+                    }
+                }
+                Err(errs) => {
+                    eprintln!("Parse error(s):");
+                    for err in errs {
+                        eprintln!("  {}", err);
+                    }
+                }
+            }
+        }
         SubCommand::Render(render_args) => {
-            // SVGレンダリング処理
             use crate::render::input::load_score_def;
-            use crate::score::score_def_data::ScoreDef;
-            use svg::node::element::{Group, Line, Circle};
-            use svg::Document;
+            use crate::render::backend::svg::render_svg;
 
             let yaml_path = "score_workspace/score_def/score_def.yaml";
+            let pvsc_path = "score_workspace/parsed_vsc.pvsc";
             let score_def = match load_score_def(yaml_path) {
                 Ok(sd) => sd,
                 Err(e) => {
@@ -62,59 +111,14 @@ fn main() {
                     return;
                 }
             };
-
-            // 最初のパート・最初の小節のnotesを抽出
-            let part = match score_def.score.parts.get(0) {
-                Some(p) => p,
-                None => {
-                    eprintln!("パートが見つかりません");
+            let pvsc_content = match std::fs::read_to_string(pvsc_path) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("pvscファイルの読み込み失敗: {}", e);
                     return;
                 }
             };
-            let measure_num = 1;
-            let notes: Vec<_> = part.notes.iter().filter(|n| n.measure == measure_num).collect();
-
-            // SVGパラメータ
-            let width = 600;
-            let height = 120;
-            let staff_top = 40;
-            let staff_left = 50;
-            let staff_spacing = 12;
-            let staff_lines = 5;
-            let note_radius = 7;
-
-            // 5線譜を描画
-            let mut group = Group::new();
-            for i in 0..staff_lines {
-                let y = staff_top + i * staff_spacing;
-                group = group.add(Line::new()
-                    .set("x1", staff_left)
-                    .set("y1", y)
-                    .set("x2", width - staff_left)
-                    .set("y2", y)
-                    .set("stroke", "black")
-                    .set("stroke-width", 2));
-            }
-
-            // 音符を等間隔で配置
-            let note_count = notes.len().max(1);
-            let note_spacing = ((width - staff_left * 2) as f32) / (note_count as f32 + 1.0);
-            for (i, _note) in notes.iter().enumerate() {
-                let cx = staff_left as f32 + note_spacing * (i as f32 + 1.0);
-                let cy = staff_top as f32 + staff_spacing as f32 * 2.0; // 仮の高さ（譜表中央）
-                group = group.add(Circle::new()
-                    .set("cx", cx)
-                    .set("cy", cy)
-                    .set("r", note_radius)
-                    .set("fill", "black"));
-            }
-
-            let document = Document::new()
-                .set("viewBox", (0, 0, width, height))
-                .add(group);
-
-            // SVGファイルに保存
-            match svg::save(&render_args.output, &document) {
+            match render_svg(&score_def, &pvsc_content, &render_args.output) {
                 Ok(_) => println!("SVGを出力しました: {}", render_args.output),
                 Err(e) => eprintln!("SVG出力失敗: {}", e),
             }

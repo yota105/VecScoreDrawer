@@ -25,71 +25,147 @@ score:
     - measure: 1
       id: 1
       attributes:
-      - accidental: None
-    - measure: 1
-      id: 2
-      attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 2/1
+      source_ids: null
     - measure: 1
       id: 3
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
+    - measure: 1
+      id: 4
+      attributes:
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
 #------------<Measure 2>------------#
     - measure: 2
       id: 1
       attributes:
-      - accidental: None
-    - measure: 2
-      id: 2
-      attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 3/2
+      source_ids: null
     - measure: 2
       id: 3
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/4
+      source_ids: null
     - measure: 2
       id: 4
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/4
+      source_ids: null
     - measure: 2
       id: 5
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
+    - measure: 2
+      id: 6
+      attributes:
+      - type: rest
+        accidental: None
+        duration: 1/1
+      source_ids: null
 #------------<Measure 3>------------#
     - measure: 3
       id: 1
       attributes:
-      - accidental: None
-    - measure: 3
-      id: 2
-      attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 2/1
+      source_ids: null
     - measure: 3
       id: 3
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
+    - measure: 3
+      id: 4
+      attributes:
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
 #------------<Measure 4>------------#
     - measure: 4
       id: 1
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
     - measure: 4
       id: 2
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/2
+      source_ids: null
     - measure: 4
       id: 3
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/4
+      source_ids: null
     - measure: 4
       id: 4
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/4
+      source_ids: null
     - measure: 4
       id: 5
       attributes:
-      - accidental: None
+      - type: note
+        accidental: None
+        duration: 1/1
+      source_ids: null
     - measure: 4
       id: 6
       attributes:
-      - accidental: None
+      - type: rest
+        accidental: None
+        duration: 1/1
+      source_ids: null
+#------------<Measure 5>------------#
+    - measure: 5
+      id: 4
+      attributes:
+      - type: note
+        accidental: None
+        duration: 3/2
+      source_ids:
+      - 1
+      - 2
+      - 3
+    - measure: 5
+      id: 6
+      attributes:
+      - type: rest
+        accidental: None
+        duration: 1/2
+      source_ids: null
+    - measure: 5
+      id: 7
+      attributes:
+      - type: rest
+        accidental: None
+        duration: 1/1
+      source_ids: null
