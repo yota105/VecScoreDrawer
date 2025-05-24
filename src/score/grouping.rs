@@ -1,58 +1,113 @@
 // 音価グルーピング・タイ分解ロジック
-use crate::data::ScoreElement;
+use crate::data::{ScoreElement, Event, Tie, Chord, EventType};
 use crate::score::score_def_data::{NoteEntry, NoteAttributes};
-
+use num_rational::Ratio;
 
 /// 小節ごとのScoreElement列からグルーピング後のNoteEntry列を生成
 pub fn group_measure_elements(
     measure_num: usize,
     elements: &[ScoreElement],
 ) -> Vec<NoteEntry> {
-    // TODO: タイ・音価グルーピングアルゴリズム実装
-    // 仮実装: 各Event/Chord/Tieを1音符としてid採番
+    // 1. Subdivisionを再帰的に展開し、フラットなイベント列にする
+    let mut flat_events = Vec::new();
+    flatten_elements(elements, &mut flat_events);
+
+    // 2. タイ・ランを検出し、連続するEvent(tie=true)とTieをまとめる
     let mut notes = Vec::new();
     let mut id = 1;
-    for elem in elements {
-        match elem {
-            ScoreElement::Event(_ev) => {
-                notes.push(NoteEntry {
-                    measure: measure_num,
-                    id,
-                    attributes: vec![NoteAttributes {
-                        accidental: "None".to_string(),
-                    }],
-                });
-                id += 1;
-            }
-            ScoreElement::Chord(_chord) => {
-                notes.push(NoteEntry {
-                    measure: measure_num,
-                    id,
-                    attributes: vec![NoteAttributes {
-                        accidental: "None".to_string(),
-                    }],
-                });
-                id += 1;
-            }
-            ScoreElement::Tie(_tie) => {
-                notes.push(NoteEntry {
-                    measure: measure_num,
-                    id,
-                    attributes: vec![NoteAttributes {
-                        accidental: "None".to_string(),
-                    }],
-                });
-                id += 1;
-            }
-            ScoreElement::Subdivision(sub) => {
-                // 再帰的に分解
-                let sub_notes = group_measure_elements(measure_num, &sub.elements);
-                for n in sub_notes {
-                    notes.push(n);
-                    id += 1;
+    let mut i = 0;
+    while i < flat_events.len() {
+        // ランの開始
+        let mut total_duration = Ratio::new(0, 1);
+        let mut j = i;
+        let mut first = true;
+        while j < flat_events.len() {
+            match &flat_events[j] {
+                FlatElem::Event(ev) => {
+                    if first || (ev.tie && !matches!(ev.event_type, EventType::Rest)) {
+                        total_duration += ev.duration.clone();
+                        first = false;
+                        j += 1;
+                    } else {
+                        break;
+                    }
+                }
+                FlatElem::Tie(tie) => {
+                    total_duration += tie.duration.clone();
+                    j += 1;
+                }
+                FlatElem::Chord(chord) => {
+                    // 和音は単独で扱う
+                    if first {
+                        total_duration += chord.events.get(0).map(|e| e.duration.clone()).unwrap_or(Ratio::new(0,1));
+                        j += 1;
+                    }
+                    break;
                 }
             }
         }
+        // 3. 記譜値集合Dによる貪欲分解
+        let mut remain = total_duration.clone();
+        let durations = get_note_durations();
+        while remain > Ratio::new(0,1) {
+            let mut found = false;
+            for d in &durations {
+                if *d <= remain {
+                    notes.push(NoteEntry {
+                        measure: measure_num,
+                        id,
+                        attributes: vec![NoteAttributes {
+                            accidental: "None".to_string(),
+                        }],
+                    });
+                    id += 1;
+                    remain -= *d;
+                    found = true;
+                    break;
+                }
+            }
+            if !found {
+                // 分解できない場合はbreak
+                break;
+            }
+        }
+        if j == i {
+            // 進まなかった場合（例: 単独のChord等）
+            j += 1;
+        }
+        i = j;
     }
     notes
+}
+
+/// 記譜値集合D（全音符、2分音符、4分音符、8分音符、16分音符、付点2分音符、付点4分音符など）
+fn get_note_durations() -> Vec<Ratio<i32>> {
+    vec![
+        Ratio::new(4,1), // 全音符
+        Ratio::new(3,1), // 付点2分
+        Ratio::new(2,1), // 2分
+        Ratio::new(3,2), // 付点4分
+        Ratio::new(1,1), // 4分
+        Ratio::new(3,4), // 付点8分
+        Ratio::new(1,2), // 8分
+        Ratio::new(1,4), // 16分
+    ]
+}
+
+/// フラットなイベント列を作る
+enum FlatElem<'a> {
+    Event(&'a Event),
+    Tie(&'a Tie),
+    Chord(&'a Chord),
+}
+
+fn flatten_elements<'a>(elements: &'a [ScoreElement], out: &mut Vec<FlatElem<'a>>) {
+    for elem in elements {
+        match elem {
+            ScoreElement::Event(ev) => out.push(FlatElem::Event(ev)),
+            ScoreElement::Tie(tie) => out.push(FlatElem::Tie(tie)),
+            ScoreElement::Chord(chord) => out.push(FlatElem::Chord(chord)),
+            ScoreElement::Subdivision(sub) => flatten_elements(&sub.elements, out),
+        }
+    }
 }
