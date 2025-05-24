@@ -1,27 +1,15 @@
 mod data;
 mod parser;
 mod processor;
+mod score;
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use parser::parse_score;
 use processor::process_score;
-use std::fs::{read_to_string, write};
-use std::path::Path;
+use score::generator::generate_score_def_yaml_from_score;
 
-#[derive(Parser)]
-#[command(name = "VecScoreDrawer")]
-struct Cli {
-    #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// Print the score to standard output or file
-    Print {
-        input: String,
-    },
-}
+mod cli;
+use cli::{Cli, Commands};
 
 fn main() {
     let cli = Cli::parse();
@@ -50,6 +38,57 @@ fn main() {
                         println!("Write file: {}", output_path);
                     }
                 },
+                Err(errs) => {
+                    eprintln!("Parse error(s):");
+                    for err in errs {
+                        eprintln!("  {}", err);
+                    }
+                }
+            }
+        }
+        Commands::GenerateScore => {
+            let vsc_input = "sample.vsc";
+            let yaml_output = "score_workspace/score_def/score_def.yaml";
+            let pvsc_output = "score_workspace/parsed_vsc.pvsc";
+            let input = match std::fs::read_to_string(std::path::Path::new(vsc_input)) {
+                Ok(content) => content,
+                Err(e) => {
+                    eprintln!("Error reading file {}: {}", vsc_input, e);
+                    return;
+                }
+            };
+            match parse_score(&input) {
+                Ok(score) => {
+                    let processed_score = process_score(score);
+
+                    // pvsc出力
+                    let formatted = format!("Parsed Score:\n{:#?}", processed_score);
+                    if let Some(parent) = std::path::Path::new(pvsc_output).parent() {
+                        std::fs::create_dir_all(parent).ok();
+                    }
+                    if let Err(e) = std::fs::write(pvsc_output, &formatted) {
+                        eprintln!("Error writing to file {}: {}", pvsc_output, e);
+                    } else {
+                        println!("Write file: {}", pvsc_output);
+                    }
+
+                    // score_def.yaml出力
+                    match generate_score_def_yaml_from_score(&processed_score) {
+                        Ok(yaml) => {
+                            if let Some(parent) = std::path::Path::new(yaml_output).parent() {
+                                std::fs::create_dir_all(parent).ok();
+                            }
+                            if let Err(e) = std::fs::write(yaml_output, &yaml) {
+                                eprintln!("Error writing to file {}: {}", yaml_output, e);
+                            } else {
+                                println!("Generated score_def.yaml: {}", yaml_output);
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error generating score_def.yaml: {}", e);
+                        }
+                    }
+                }
                 Err(errs) => {
                     eprintln!("Parse error(s):");
                     for err in errs {

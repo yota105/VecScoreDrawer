@@ -1,0 +1,107 @@
+#------------<Score Global Definition>------------#
+score:
+  tempo:
+  - measure: 1
+    position: 1.0
+    bpm: 120
+  key_signature:
+  - measure: 1
+    position: 1.0
+    key: C_Major
+  parts:
+  - name: Piano
+    staves:
+    - measure: 1
+      position: 1.0
+      type: single
+      lines:
+      - 5
+    dynamics:
+    - measure: 1
+      position: 1.0
+      level: P
+    notes:
+#------------<Measure 1>------------#
+    - measure: 1
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 1
+      id: 2
+      attributes:
+      - accidental: None
+    - measure: 1
+      id: 3
+      attributes:
+      - accidental: None
+    - measure: 1
+      id: 4
+      attributes:
+      - accidental: None
+#------------<Measure 2>------------#
+    - measure: 2
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 2
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 2
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 2
+      id: 2
+      attributes:
+      - accidental: None
+    - measure: 2
+      id: 5
+      attributes:
+      - accidental: None
+    - measure: 2
+      id: 6
+      attributes:
+      - accidental: None
+#------------<Measure 3>------------#
+    - measure: 3
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 3
+      id: 2
+      attributes:
+      - accidental: None
+    - measure: 3
+      id: 3
+      attributes:
+      - accidental: None
+    - measure: 3
+      id: 4
+      attributes:
+      - accidental: None
+#------------<Measure 4>------------#
+    - measure: 4
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 4
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 4
+      id: 1
+      attributes:
+      - accidental: None
+    - measure: 4
+      id: 2
+      attributes:
+      - accidental: None
+    - measure: 4
+      id: 5
+      attributes:
+      - accidental: None
+    - measure: 4
+      id: 6
+      attributes:
+      - accidental: None
